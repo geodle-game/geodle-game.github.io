@@ -1,0 +1,2396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- SEO Meta Tags -->
+<meta name="description" content="Civile - Test your geography knowledge with our interactive world map game. Guess cities, build streaks, and compete for high scores in this engaging geography challenge.">
+<meta name="keywords" content="geography game, world map, city guessing, geography quiz, educational game, world cities, map game, geography challenge, interactive learning">
+<meta name="author" content="Civile Geography Game">
+<meta name="robots" content="index, follow">
+
+<!-- Open Graph Meta Tags -->
+<meta property="og:title" content="Civile - Geography Challenge Game">
+<meta property="og:description" content="Test your geography knowledge by guessing cities on an interactive world map. Build streaks, earn achievements, and become a geography master!">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://r293239.github.io/Geodle/civile">
+<meta property="og:image" content="https://r293239.github.io/Geodle/icon.png">
+<meta property="og:site_name" content="Civile Geography Game">
+
+<!-- Twitter Card Meta Tags -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Civile - Geography Challenge Game">
+<meta name="twitter:description" content="Test your geography knowledge with our interactive world map game. Guess cities and compete for high scores!">
+<meta name="twitter:image" content="https://r293239.github.io/Geodle/icon.png">
+
+<!-- Additional SEO Tags -->
+<meta name="theme-color" content="#2c5530">
+<meta name="msapplication-TileColor" content="#2c5530">
+<link rel="canonical" href="https://r293239.github.io/Geodle/civile">
+
+<!-- Structured Data (JSON-LD) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Civile - Geography Challenge",
+  "description": "Interactive geography game where players guess city locations on a world map",
+  "url": "https://r293239.github.io/Geodle/civile",
+  "applicationCategory": "Game",
+  "genre": ["Educational", "Geography", "Puzzle"],
+  "operatingSystem": "Web Browser",
+  "author": {
+    "@type": "Organization",
+    "name": "Civile"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "audience": {
+    "@type": "PeopleAudience",
+    "suggestedMinAge": "8",
+    "suggestedMaxAge": "99"
+  }
+}
+</script>
+<!-- Simple Favicon Setup -->
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="shortcut icon" href="icon.png">
+<!-- Preload important resources -->
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" as="style">
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style">
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js" as="script">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civile - Geography Challenge</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2c5530;
+            --secondary-color: #4a7c59;
+            --accent-color: #f2c94c;
+            --success-color: #27ae60;
+            --error-color: #e74c3c;
+            --warning-color: #f39c12;
+            --dark-bg: #1a2f1a;
+            --light-text: #f5f5f5;
+            --glass-bg: rgba(255,255,255,0.1);
+            --glass-border: rgba(255,255,255,0.2);
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            color: var(--light-text);
+            overflow-x: hidden;
+        }
+
+        /* Natural Background */
+        .natural-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(76, 175, 80, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 195, 74, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(56, 142, 60, 0.1) 0%, transparent 50%);
+        }
+
+        .natural-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.05)"/></svg>') repeat,
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><path d="M100,20 C120,40 140,60 160,80 C140,100 120,120 100,140 C80,120 60,100 40,80 C60,60 80,40 100,20 Z" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/></svg>') repeat;
+            animation: floatBackground 60s infinite linear;
+        }
+
+        @keyframes floatBackground {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100px, -50px); }
+        }
+
+        /* Navigation */
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            position: relative;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            position: relative;
+        }
+
+        .nav-link {
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            color: var(--light-text);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            background: var(--glass-bg);
+            transform: translateY(-2px);
+        }
+
+        /* Game Modes Dropdown */
+        .game-modes-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 10px;
+            min-width: 200px;
+            display: none;
+            z-index: 1001;
+            margin-top: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .game-modes-dropdown.show {
+            display: block;
+        }
+
+        .mode-link {
+            display: block;
+            padding: 10px 15px;
+            color: var(--light-text);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin: 5px 0;
+        }
+
+        .mode-link:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(5px);
+        }
+
+        /* Page containers */
+        .page {
+            display: none;
+            min-height: calc(100vh - 80px);
+            position: relative;
+            z-index: 1;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Game page styles */
+        .game-header {
+            text-align: center;
+            padding: 30px 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--glass-border);
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, var(--accent-color), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: var(--glass-bg);
+            padding: 15px 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .game-container {
+            padding: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .city-prompt {
+            background: rgba(255,255,255,0.95);
+            color: var(--dark-bg);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .city-prompt::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .city-name {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--dark-bg);
+            position: relative;
+            z-index: 1;
+        }
+
+        .city-hint {
+            font-size: 1.2em;
+            color: #7f8c8d;
+            font-style: italic;
+            position: relative;
+            z-index: 1;
+        }
+
+        .timer-container {
+            margin-bottom: 25px;
+        }
+
+        .timer-bar {
+            width: 100%;
+            height: 12px;
+            background: var(--glass-bg);
+            border-radius: 6px;
+            overflow: hidden;
+            border: 2px solid var(--glass-border);
+            position: relative;
+        }
+
+        .timer-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success-color), var(--warning-color), var(--error-color));
+            transition: width 0.1s linear;
+            border-radius: 4px;
+            position: relative;
+            width: 100%;
+        }
+
+        .timer-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: timerShine 2s infinite;
+        }
+
+        @keyframes timerShine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        #map {
+            width: 100%;
+            height: 500px;
+            border-radius: 20px;
+            border: 3px solid var(--glass-border);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        #map.blind-mode {
+            filter: blur(15px) brightness(0.2);
+        }
+
+        .map-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            z-index: 400;
+            pointer-events: none;
+            background: transparent;
+        }
+
+        .blind-mode-message {
+            text-align: center;
+            color: white;
+            font-size: 1.5em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            pointer-events: none;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, var(--success-color), #2ecc71);
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, var(--warning-color), #e67e22);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, var(--error-color), #c0392b);
+        }
+
+        /* Enhanced Feedback */
+        .feedback {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 25px 45px;
+            border-radius: 20px;
+            font-size: 1.5em;
+            font-weight: bold;
+            z-index: 1000;
+            animation: feedbackShow 3s ease-out forwards;
+            pointer-events: none;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .feedback.correct {
+            background: linear-gradient(45deg, var(--success-color), #2ecc71);
+            color: white;
+        }
+
+        .feedback.incorrect {
+            background: linear-gradient(45deg, var(--error-color), #c0392b);
+            color: white;
+        }
+
+        @keyframes feedbackShow {
+            0% { 
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5) rotateX(90deg);
+            }
+            15% { 
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.1) rotateX(0deg);
+            }
+            25% { 
+                transform: translate(-50%, -50%) scale(1) rotateX(0deg);
+            }
+            85% { 
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1) rotateX(0deg);
+            }
+            100% { 
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8) rotateX(-90deg);
+            }
+        }
+
+        /* Settings Page */
+        .settings-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .settings-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+        }
+
+        .settings-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: var(--glass-bg);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle.active {
+            background: var(--success-color);
+        }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        .toggle.active::after {
+            transform: translateX(30px);
+        }
+
+        .slider {
+            width: 200px;
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--glass-bg);
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            cursor: pointer;
+        }
+
+        /* Help Page */
+        .help-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .help-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+        }
+
+        .help-title {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .feature-card {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid var(--glass-border);
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: var(--accent-color);
+        }
+
+        /* Leaderboard */
+        .leaderboard {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 25px;
+        }
+
+        .leaderboard h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+            font-size: 1.5em;
+        }
+
+        .score-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            margin: 10px 0;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+        }
+
+        .score-entry:hover {
+            transform: translateX(5px);
+            background: rgba(255,255,255,0.1);
+        }
+
+        .score-rank {
+            font-weight: bold;
+            color: var(--accent-color);
+            min-width: 40px;
+        }
+
+        .score-details {
+            flex-grow: 1;
+            margin-left: 15px;
+        }
+
+        .score-main {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .score-meta {
+            font-size: 0.85em;
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+
+        .score-date {
+            text-align: right;
+            min-width: 80px;
+        }
+
+        /* Achievements Page */
+        .achievements-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .achievement-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .achievement-card.locked {
+            opacity: 0.5;
+            filter: grayscale(1);
+        }
+
+        .achievement-card.unlocked {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 20px rgba(242, 201, 76, 0.3);
+        }
+
+        .achievement-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .achievement-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--accent-color);
+        }
+
+        .achievement-desc {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+
+        .achievement-progress {
+            width: 100%;
+            height: 6px;
+            background: var(--glass-bg);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .achievement-progress-fill {
+            height: 100%;
+            background: var(--accent-color);
+            transition: width 0.3s ease;
+        }
+
+        .achievement-date {
+            font-size: 0.8em;
+            opacity: 0.6;
+            font-style: italic;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-bar {
+                padding: 15px 20px;
+            }
+
+            .nav-links {
+                gap: 10px;
+            }
+
+            .nav-link {
+                padding: 6px 12px;
+                font-size: 14px;
+            }
+
+            .game-stats {
+                gap: 15px;
+            }
+            
+            .stat-item {
+                padding: 12px 20px;
+            }
+            
+            .city-name {
+                font-size: 2em;
+            }
+            
+            #map {
+                height: 350px;
+            }
+
+            .controls {
+                gap: 10px;
+            }
+
+            .btn {
+                padding: 10px 18px;
+                font-size: 14px;
+            }
+
+            h1 {
+                font-size: 2.2em;
+            }
+            
+            .game-modes-dropdown {
+                min-width: 180px;
+                left: -50px;
+            }
+
+            .achievement-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Achievement Popup */
+        .achievement {
+            position: fixed;
+            top: 100px;
+            right: -300px;
+            width: 280px;
+            background: linear-gradient(45deg, var(--accent-color), #f1c40f);
+            color: var(--dark-bg);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            transition: right 0.5s ease;
+            z-index: 1001;
+        }
+
+        .achievement.show {
+            right: 20px;
+        }
+
+        .achievement-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2000;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid rgba(255,255,255,0.3);
+            border-top: 6px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Enhanced Map Markers */
+        .click-marker {
+            background: rgba(231, 76, 60, 0.8);
+            border: 3px solid #e74c3c;
+            border-radius: 50%;
+            animation: markerPulse 1s ease-out;
+        }
+
+        .correct-marker {
+            background: rgba(39, 174, 96, 0.8);
+            border-color: #27ae60;
+            animation: correctPulse 1s ease-out;
+        }
+
+        @keyframes markerPulse {
+            0% { 
+                transform: scale(0.5);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.5);
+                opacity: 0.8;
+            }
+            100% { 
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        @keyframes correctPulse {
+            0% { 
+                transform: scale(0.5);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.9;
+            }
+            100% { 
+                transform: scale(1.8);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Natural Background -->
+    <div class="natural-bg"></div>
+
+    <!-- Navigation -->
+    <nav class="nav-bar">
+        <div class="logo">🌍 Civile</div>
+        <div class="nav-links">
+            <a href="#" class="nav-link" onclick="showPage('game')"><i class="fas fa-play"></i> Play</a>
+            <a href="#" class="nav-link" onclick="showPage('achievements')"><i class="fas fa-trophy"></i> Achievements</a>
+            <a href="#" class="nav-link" onclick="showPage('settings')"><i class="fas fa-cog"></i> Settings</a>
+            <a href="#" class="nav-link" onclick="showPage('help')"><i class="fas fa-question-circle"></i> Help</a>
+            
+            <!-- Game Modes Dropdown -->
+            <div class="nav-link" id="gameModesBtn">
+                <i class="fas fa-globe-americas"></i> Game Modes
+                <div class="game-modes-dropdown" id="gameModesDropdown">
+                    <a href="index.html" class="mode-link">
+                        <i class="fas fa-map-marked-alt"></i> Geodle
+                    </a>
+                    <a href="path-mode.html" class="mode-link">
+                        <i class="fas fa-route"></i> Routele
+                    </a>
+                    <a href="country-mode.html" class="mode-link">
+                        <i class="fas fa-flag"></i> Countryle
+                    </a>
+                    <a href="flag-mode.html" class="mode-link">
+                        <i class="fas fa-flag-usa"></i> Flagle
+                    </a>
+                    <a href="bordle.html" class="mode-link">
+                        <i class="fas fa-flag-usa"></i> Bordle
+                    </a>
+                     <a href="histle.html" class="mode-link">
+                        <i class="fas fa-flag-usa"></i> Histle
+                    </a>
+                </div>
+            </div>
+            
+            <a href="https://docs.google.com/forms/d/1Sr-6EWcdBa7Hst9nyJLvTz7oU-eGozoYBpZTMKj7_mU/edit" target="_blank" class="nav-link"><i class="fas fa-heart"></i> Help Us Improve</a>
+        </div>
+    </nav>
+
+    <!-- Game Page -->
+    <div id="game-page" class="page active">
+        <div class="game-header">
+            <h1>Geography Challenge</h1>
+            <div class="game-stats">
+                <div class="stat-item">
+                    <div class="stat-label">Score</div>
+                    <div class="stat-value" id="score">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Round</div>
+                    <div class="stat-value" id="round">1</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Streak</div>
+                    <div class="stat-value" id="streak">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Best Time</div>
+                    <div class="stat-value" id="bestTime">--</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Accuracy</div>
+                    <div class="stat-value" id="accuracy">100%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-container">
+            <div class="city-prompt" id="cityPrompt">
+                <div class="city-name" id="cityName">Loading cities data...</div>
+                <div class="city-hint" id="cityHint">Please wait while we load the game data</div>
+            </div>
+
+            <div class="timer-container">
+                <div class="timer-bar">
+                    <div class="timer-fill" id="timerFill"></div>
+                </div>
+            </div>
+
+            <div style="position: relative;">
+                <div id="map"></div>
+                <div class="map-overlay" id="mapOverlay">
+                    <div class="blind-mode-message">
+                        <i class="fas fa-eye-slash" style="font-size: 3em; margin-bottom: 20px;"></i>
+                        <h3>Blind Mode Active</h3>
+                        <p>Click anywhere on the map to guess the location!</p>
+                        <p style="font-size: 0.8em; margin-top: 10px; opacity: 0.7;">Map revealed after each guess</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="startBtn" class="btn" disabled><i class="fas fa-play"></i> Start Game</button>
+                <button id="pauseBtn" class="btn btn-warning" disabled><i class="fas fa-pause"></i> Pause</button>
+                <button id="skipBtn" class="btn btn-danger" disabled><i class="fas fa-forward"></i> Skip (-50 pts)</button>
+                <button id="hintBtn" class="btn" disabled><i class="fas fa-lightbulb"></i> Hint (-25 pts)</button>
+                <button id="resetBtn" class="btn"><i class="fas fa-redo"></i> Reset</button>
+            </div>
+
+            <div class="leaderboard" id="leaderboard">
+                <h3><i class="fas fa-trophy"></i> Your Best Runs</h3>
+                <div id="scoresList">No scores yet!</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievements Page -->
+    <div id="achievements-page" class="page">
+        <div class="achievements-container">
+            <h1 style="text-align: center; margin-bottom: 30px;"><i class="fas fa-trophy"></i> Achievements</h1>
+            
+            <div class="settings-section">
+                <h2 class="settings-title"><i class="fas fa-medal"></i> Your Progress</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                    <div style="text-align: center; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px;">
+                        <div style="font-size: 2em; color: var(--accent-color);" id="totalAchievements">0</div>
+                        <div>Achievements Unlocked</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px;">
+                        <div style="font-size: 2em; color: var(--success-color);" id="achievementProgress">0%</div>
+                        <div>Completion</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="achievement-grid" id="achievementsList">
+                <!-- Achievements will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Page -->
+    <div id="settings-page" class="page">
+        <div class="settings-container">
+            <h1 style="text-align: center; margin-bottom: 30px;"><i class="fas fa-cog"></i> Settings</h1>
+            
+            <div class="settings-section">
+                <h2 class="settings-title"><i class="fas fa-gamepad"></i> Game Settings</h2>
+                
+                <div class="setting-item">
+                    <div>
+                        <strong>Sound Effects</strong>
+                        <div style="opacity: 0.7; font-size: 0.9em;">Enable audio feedback for correct/incorrect answers</div>
+                    </div>
+                    <div class="toggle" id="soundToggle"></div>
+                </div>
+                
+                <div class="setting-item">
+                    <div>
+                        <strong>Time Pressure Mode</strong>
+                        <div style="opacity: 0.7; font-size: 0.9em;">Shorter time limits for increased difficulty</div>
+                    </div>
+                    <div class="toggle" id="timePressureToggle"></div>
+                </div>
+                
+                <div class="setting-item">
+                    <div>
+                        <strong>Blind Mode</strong>
+                        <div style="opacity: 0.7; font-size: 0.9em;">Hide the map - guess based on geography knowledge only</div>
+                    </div>
+                    <div class="toggle" id="blindModeToggle"></div>
+                </div>
+                
+                <div class="setting-item">
+                    <div>
+                        <strong>Show Country Names</strong>
+                        <div style="opacity: 0.7; font-size: 0.9em;">Display country names as additional hints</div>
+                    </div>
+                    <div class="toggle" id="countryHintToggle"></div>
+                </div>
+                
+                <div class="setting-item">
+                    <div>
+                        <strong>Game Difficulty</strong>
+                        <div style="opacity: 0.7; font-size: 0.9em;">Adjust tolerance for correct answers</div>
+                    </div>
+                    <input type="range" id="difficultySlider" class="slider" min="1" max="5" value="3">
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <h2 class="settings-title"><i class="fas fa-palette"></i> Display Settings</h2>
+                
+                <div class="setting-item">
+                    <div>
+                        <strong>Dark Mode Map</strong>
+                        <div style="opacity: 0.7; font-size: 0.9em;">Use dark theme for map tiles</div>
+                    </div>
+                    <div class="toggle" id="darkMapToggle"></div>
+                </div>
+                
+                <div class="setting-item">
+                    <div>
+                        <strong>Reduced Animations</strong>
+                        <div style="opacity: 0.7; font-size: 0.9em;">Minimize visual effects for better performance</div>
+                    </div>
+                    <div class="toggle" id="reducedAnimToggle"></div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h2 class="settings-title"><i class="fas fa-chart-bar"></i> Statistics</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div style="text-align: center; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px;">
+                        <div style="font-size: 2em; color: var(--accent-color);" id="totalGames">0</div>
+                        <div>Games Played</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px;">
+                        <div style="font-size: 2em; color: var(--success-color);" id="totalScore">0</div>
+                        <div>Total Score</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px;">
+                        <div style="font-size: 2em; color: var(--warning-color);" id="avgAccuracy">0%</div>
+                        <div>Average Accuracy</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Page -->
+    <div id="help-page" class="page">
+        <div class="help-container">
+            <h1 style="text-align: center; margin-bottom: 30px;"><i class="fas fa-info-circle"></i> How to Play Civile</h1>
+            
+            <div class="help-section">
+                <h2 class="help-title"><i class="fas fa-gamepad"></i> Game Rules</h2>
+                <p>Civile is a geography challenge where you test your knowledge of world cities. Here's how it works:</p>
+                <ul style="margin: 15px 0; padding-left: 25px;">
+                    <li style="margin: 8px 0;">🎯 Click on the world map to guess where each city is located</li>
+                    <li style="margin: 8px 0;">⏱️ You have 10 seconds per city (or less in Time Pressure mode)</li>
+                    <li style="margin: 8px 0;">🎖️ Earn points based on accuracy, speed, and difficulty</li>
+                    <li style="margin: 8px 0;">🔥 Build streaks for bonus points</li>
+                    <li style="margin: 8px 0;">📍 The closer you click, the more points you get</li>
+                    <li style="margin: 8px 0;">👁️ Try <strong>Blind Mode</strong> for ultimate challenge - no map visible!</li>
+                </ul>
+            </div>
+            
+            <div class="help-section">
+                <h2 class="help-title"><i class="fas fa-star"></i> New Features</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">👁️</div>
+                        <h3>Blind Mode</h3>
+                        <p>Test your pure geography knowledge - the map is completely hidden until after each guess!</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💡</div>
+                        <h3>Smart Hints</h3>
+                        <p>Use hints to get additional clues about the city's location, culture, or famous landmarks.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎵</div>
+                        <h3>Sound Effects</h3>
+                        <p>Immersive audio feedback that celebrates correct answers and guides you through mistakes.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>Time Pressure Mode</h3>
+                        <p>Challenge yourself with reduced time limits for each guess - only for geography masters!</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h2 class="help-title"><i class="fas fa-trophy"></i> Scoring System</h2>
+                <div style="display: grid; gap: 15px;">
+                    <div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                        <span>🎯 Base Score (Correct Answer)</span>
+                        <span style="color: var(--success-color); font-weight: bold;">100 points</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                        <span>⚡ Speed Bonus (Time Remaining)</span>
+                        <span style="color: var(--warning-color); font-weight: bold;">Up to 100 points</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                        <span>🎯 Accuracy Bonus (Distance)</span>
+                        <span style="color: var(--accent-color); font-weight: bold;">Up to 200 points</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                        <span>🔥 Streak Multiplier</span>
+                        <span style="color: var(--success-color); font-weight: bold;">10 × streak</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                        <span>👁️ Blind Mode Bonus</span>
+                        <span style="color: var(--accent-color); font-weight: bold;">+50 points per round</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Achievement Popup -->
+    <div class="achievement" id="achievement">
+        <div class="achievement-title">🏆 Achievement Unlocked!</div>
+        <div class="achievement-text"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script>
+        class EnhancedCivileGame {
+            constructor() {
+                this.cities = [];
+                this.score = 0;
+                this.round = 1;
+                this.streak = 0;
+                this.bestTime = null;
+                this.accuracy = 100;
+                this.currentCity = null;
+                this.gameActive = false;
+                this.isPaused = false;
+                this.timer = null;
+                this.timeLeft = 10000;
+                this.startTime = 0;
+                this.highScores = [];
+                this.map = null;
+                this.markers = [];
+                this.usedCities = [];
+                this.hintUsed = false;
+                this.correctAnswers = 0;
+                this.totalAnswers = 0;
+                this.achievements = [];
+                this.canGuess = true;
+                
+                this.settings = {
+                    sound: true,
+                    timePressure: false,
+                    blindMode: false,
+                    countryHint: true,
+                    difficulty: 3,
+                    darkMap: false,
+                    reducedAnim: false
+                };
+                
+                this.stats = {
+                    totalGames: 0,
+                    totalScore: 0,
+                    correctAnswers: 0,
+                    totalAnswers: 0
+                };
+
+                // Define all possible achievements
+                this.allAchievements = {
+                    first_correct: {
+                        id: 'first_correct',
+                        title: '🎯 First Success!',
+                        description: 'Get your first city correct',
+                        icon: '🎯',
+                        unlocked: false,
+                        date: null,
+                        progress: 0,
+                        maxProgress: 1
+                    },
+                    streak_5: {
+                        id: 'streak_5',
+                        title: '🔥 Hot Streak!',
+                        description: 'Five correct answers in a row',
+                        icon: '🔥',
+                        unlocked: false,
+                        date: null,
+                        progress: 0,
+                        maxProgress: 5
+                    },
+                    streak_10: {
+                        id: 'streak_10',
+                        title: '⚡ Lightning Streak!',
+                        description: 'Ten correct answers in a row',
+                        icon: '⚡',
+                        unlocked: false,
+                        date: null,
+                        progress: 0,
+                        maxProgress: 10
+                    },
+                    speed_demon: {
+                        id: 'speed_demon',
+                        title: '⚡ Lightning Fast!',
+                        description: 'Answer in under 2 seconds',
+                        icon: '⚡',
+                        unlocked: false,
+                        date: null,
+                        progress: 0,
+                        maxProgress: 1
+                    },
+                    expert: {
+                        id: 'expert',
+                        title: '🌍 Geography Expert!',
+                        description: 'Score over 2000 points in one game',
+                        icon: '🌍',
+                        unlocked: false,
+                        date: null,
+                        progress: 0,
+                        maxProgress: 2000
+                    },
+                    blind_master: {
+                        id: 'blind_master',
+                        title: '👁️ Blind Master!',
+                        description: 'Get 3+ streak in Blind Mode',
+                        icon: '👁️',
+                        unlocked: false,
+                        date: null,
+                        progress: 0,
+                        maxProgress: 3
+                    },
+                    perfect_game: {
+                        id: 'perfect_game',
+                        title: '🏆 Perfect Game!',
+                        description: '100% accuracy in a 10-round game',
+                        icon: '🏆',
+                        unlocked: false,
+                        date: null,
+                        progress: 0,
+                        maxProgress: 10
+                    },
+                    world_traveler: {
+                        id: 'world_traveler',
+                        title: '✈️ World Traveler!',
+                        description: 'Play 50 cities total',
+                        icon: '✈️',
+                        unlocked: false,
+                        date: null,
+                        progress: 0,
+                        maxProgress: 50
+                    },
+                    marathon: {
+                        id: 'marathon',
+                        title: '🏃 Marathon Runner!',
+                        description: 'Complete 10 games',
+                        icon: '🏃',
+                        unlocked: false,
+                        date: null,
+                        progress: 0,
+                        maxProgress: 10
+                    },
+                    high_roller: {
+                        id: 'high_roller',
+                        title: '💰 High Roller!',
+                        description: 'Reach 5000 total score across all games',
+                        icon: '💰',
+                        unlocked: false,
+                        date: null,
+                        progress: 0,
+                        maxProgress: 5000
+                    }
+                };
+                
+                this.initializeGame();
+            }
+            
+            async initializeGame() {
+                await this.loadCitiesData();
+                this.loadSettings();
+                this.loadStats();
+                this.loadHighScores();
+                this.loadAchievements();
+                this.initializeMap();
+                this.initializeElements();
+                this.setupEventListeners();
+                this.updateDisplay();
+                this.showLeaderboard();
+                this.updateSettingsDisplay();
+                this.showAchievementsPage();
+                
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('cityName').textContent = 'Click "Start Game" to begin!';
+                document.getElementById('cityHint').textContent = 'Test your geography knowledge by clicking cities on the world map';
+            }
+            
+            async loadCitiesData() {
+                try {
+                    this.showLoading(true);
+                    const response = await fetch('cities-data.json');
+                    if (!response.ok) {
+                        throw new Error('Failed to load cities data');
+                    }
+                    this.cities = await response.json();
+                    console.log(`Loaded ${this.cities.length} cities from external file`);
+                    this.showLoading(false);
+                } catch (error) {
+                    console.error('Error loading cities data:', error);
+                    this.cities = [
+                        {
+                            "name": "Paris",
+                            "lat": 48.8566,
+                            "lng": 2.3522,
+                            "hint": "City of Light, home to the Eiffel Tower",
+                            "difficulty": 1,
+                            "country": "France"
+                        },
+                        {
+                            "name": "Tokyo",
+                            "lat": 35.6762,
+                            "lng": 139.6503,
+                            "hint": "Japan's capital, famous for technology",
+                            "difficulty": 1,
+                            "country": "Japan"
+                        },
+                        {
+                            "name": "New York",
+                            "lat": 40.7128,
+                            "lng": -74.0060,
+                            "hint": "The Big Apple, home to Statue of Liberty",
+                            "difficulty": 1,
+                            "country": "USA"
+                        }
+                    ];
+                    this.showLoading(false);
+                }
+            }
+            
+            initializeMap() {
+                this.map = L.map('map', {
+                    center: [20, 0],
+                    zoom: 2,
+                    minZoom: 2,
+                    maxZoom: 8,
+                    worldCopyJump: true
+                });
+                
+                this.updateMapTheme();
+                console.log('Map initialized successfully');
+            }
+
+            updateMapTheme() {
+                this.map.eachLayer((layer) => {
+                    if (layer._url) {
+                        this.map.removeLayer(layer);
+                    }
+                });
+
+                const tileUrl = this.settings.darkMap ? 
+                    'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' :
+                    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+                
+                L.tileLayer(tileUrl, {
+                    attribution: '© OpenStreetMap contributors',
+                    noWrap: true
+                }).addTo(this.map);
+            }
+            
+            initializeElements() {
+                this.scoreEl = document.getElementById('score');
+                this.roundEl = document.getElementById('round');
+                this.streakEl = document.getElementById('streak');
+                this.bestTimeEl = document.getElementById('bestTime');
+                this.accuracyEl = document.getElementById('accuracy');
+                this.cityNameEl = document.getElementById('cityName');
+                this.cityHintEl = document.getElementById('cityHint');
+                this.timerFillEl = document.getElementById('timerFill');
+                this.startBtn = document.getElementById('startBtn');
+                this.pauseBtn = document.getElementById('pauseBtn');
+                this.skipBtn = document.getElementById('skipBtn');
+                this.hintBtn = document.getElementById('hintBtn');
+                this.resetBtn = document.getElementById('resetBtn');
+                this.leaderboardEl = document.getElementById('leaderboard');
+                this.scoresListEl = document.getElementById('scoresList');
+                this.mapOverlay = document.getElementById('mapOverlay');
+                
+                this.totalGamesEl = document.getElementById('totalGames');
+                this.totalScoreEl = document.getElementById('totalScore');
+                this.avgAccuracyEl = document.getElementById('avgAccuracy');
+            }
+            
+            setupEventListeners() {
+                this.startBtn.addEventListener('click', () => this.startGame());
+                this.pauseBtn.addEventListener('click', () => this.togglePause());
+                this.skipBtn.addEventListener('click', () => this.skipCity());
+                this.hintBtn.addEventListener('click', () => this.showHint());
+                this.resetBtn.addEventListener('click', () => this.resetGame());
+                
+                this.map.on('click', (e) => this.handleMapClick(e));
+                
+                this.setupGameModesDropdown();
+            }
+
+            setupGameModesDropdown() {
+                const gameModesBtn = document.getElementById('gameModesBtn');
+                const gameModesDropdown = document.getElementById('gameModesDropdown');
+                
+                if (gameModesBtn && gameModesDropdown) {
+                    gameModesBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        gameModesDropdown.classList.toggle('show');
+                    });
+                    
+                    document.addEventListener('click', () => {
+                        gameModesDropdown.classList.remove('show');
+                    });
+                    
+                    gameModesDropdown.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                    });
+                }
+            }
+            
+            loadSettings() {
+                try {
+                    const saved = localStorage.getItem('civile_settings');
+                    if (saved) {
+                        this.settings = { ...this.settings, ...JSON.parse(saved) };
+                    }
+                } catch (error) {
+                    console.error('Error loading settings:', error);
+                }
+            }
+
+            saveSettings() {
+                try {
+                    localStorage.setItem('civile_settings', JSON.stringify(this.settings));
+                } catch (error) {
+                    console.error('Error saving settings:', error);
+                }
+            }
+
+            loadStats() {
+                try {
+                    const saved = localStorage.getItem('civile_stats');
+                    if (saved) {
+                        this.stats = { ...this.stats, ...JSON.parse(saved) };
+                    }
+                } catch (error) {
+                    console.error('Error loading stats:', error);
+                }
+                this.updateStatsDisplay();
+            }
+
+            saveStats() {
+                this.stats.totalGames++;
+                this.stats.totalScore += this.score;
+                if (this.totalAnswers > 0) {
+                    this.stats.correctAnswers += this.correctAnswers;
+                    this.stats.totalAnswers += this.totalAnswers;
+                }
+                
+                try {
+                    localStorage.setItem('civile_stats', JSON.stringify(this.stats));
+                } catch (error) {
+                    console.error('Error saving stats:', error);
+                }
+                this.updateStatsDisplay();
+            }
+
+            loadAchievements() {
+                try {
+                    const saved = localStorage.getItem('civile_achievements');
+                    if (saved) {
+                        const savedAchievements = JSON.parse(saved);
+                        Object.keys(this.allAchievements).forEach(key => {
+                            if (savedAchievements[key]) {
+                                this.allAchievements[key] = { ...this.allAchievements[key], ...savedAchievements[key] };
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error loading achievements:', error);
+                }
+            }
+
+            saveAchievements() {
+                try {
+                    localStorage.setItem('civile_achievements', JSON.stringify(this.allAchievements));
+                    this.showAchievementsPage();
+                    this.updateAchievementStats();
+                } catch (error) {
+                    console.error('Error saving achievements:', error);
+                }
+            }
+
+            updateAchievementStats() {
+                const totalAchievements = Object.keys(this.allAchievements).length;
+                const unlockedAchievements = Object.values(this.allAchievements).filter(ach => ach.unlocked).length;
+                const progress = Math.round((unlockedAchievements / totalAchievements) * 100);
+                
+                document.getElementById('totalAchievements').textContent = `${unlockedAchievements}/${totalAchievements}`;
+                document.getElementById('achievementProgress').textContent = `${progress}%`;
+            }
+
+            showAchievementsPage() {
+                const achievementsList = document.getElementById('achievementsList');
+                if (!achievementsList) return;
+                
+                achievementsList.innerHTML = Object.values(this.allAchievements).map(achievement => {
+                    const progressPercent = (achievement.progress / achievement.maxProgress) * 100;
+                    const isUnlocked = achievement.unlocked;
+                    
+                    return `
+                        <div class="achievement-card ${isUnlocked ? 'unlocked' : 'locked'}">
+                            <div class="achievement-icon">${achievement.icon}</div>
+                            <div class="achievement-title">${achievement.title}</div>
+                            <div class="achievement-desc">${achievement.description}</div>
+                            <div class="achievement-progress">
+                                <div class="achievement-progress-fill" style="width: ${Math.min(100, progressPercent)}%"></div>
+                            </div>
+                            <div class="achievement-meta">
+                                ${isUnlocked ? 
+                                    `<div class="achievement-date">Unlocked: ${achievement.date || 'Recently'}</div>` :
+                                    `<div>Progress: ${achievement.progress}/${achievement.maxProgress}</div>`
+                                }
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                this.updateAchievementStats();
+            }
+
+            updateStatsDisplay() {
+                if (this.totalGamesEl) {
+                    this.totalGamesEl.textContent = this.stats.totalGames;
+                    this.totalScoreEl.textContent = this.stats.totalScore.toLocaleString();
+                    const avgAccuracy = this.stats.totalAnswers > 0 ? 
+                        Math.round((this.stats.correctAnswers / this.stats.totalAnswers) * 100) : 0;
+                    this.avgAccuracyEl.textContent = avgAccuracy + '%';
+                }
+            }
+            
+            loadHighScores() {
+                try {
+                    const saved = localStorage.getItem('civile_highscores');
+                    if (saved) {
+                        this.highScores = JSON.parse(saved);
+                    }
+                } catch (error) {
+                    console.error('Error loading high scores:', error);
+                }
+            }
+            
+            updateSettingsDisplay() {
+                Object.keys(this.settings).forEach(setting => {
+                    const toggle = document.getElementById(setting + 'Toggle');
+                    if (toggle) {
+                        toggle.classList.toggle('active', this.settings[setting]);
+                        toggle.onclick = () => this.toggleSetting(setting);
+                    }
+                });
+                
+                const difficultySlider = document.getElementById('difficultySlider');
+                if (difficultySlider) {
+                    difficultySlider.value = this.settings.difficulty;
+                    difficultySlider.onchange = (e) => this.updateDifficulty(e.target.value);
+                }
+            }
+
+            toggleSetting(setting) {
+                this.settings[setting] = !this.settings[setting];
+                this.saveSettings();
+                this.updateSettingsDisplay();
+                
+                if (setting === 'darkMap') {
+                    this.updateMapTheme();
+                } else if (setting === 'blindMode') {
+                    this.updateBlindMode();
+                }
+            }
+
+            updateDifficulty(value) {
+                this.settings.difficulty = parseInt(value);
+                this.saveSettings();
+            }
+            
+            updateBlindMode() {
+                const mapElement = document.getElementById('map');
+                const mapOverlay = document.getElementById('mapOverlay');
+                
+                // Always show blind mode when enabled and game is active (even when paused)
+                if (this.settings.blindMode && this.gameActive) {
+                    mapElement.classList.add('blind-mode');
+                    mapOverlay.style.display = 'flex';
+                } else {
+                    mapElement.classList.remove('blind-mode');
+                    mapOverlay.style.display = 'none';
+                }
+            }
+            
+            showLoading(show) {
+                document.getElementById('loading').classList.toggle('show', show);
+            }
+            
+            startGame() {
+                if (this.cities.length === 0) {
+                    this.showFeedback('No cities loaded!', 'incorrect');
+                    return;
+                }
+
+                this.gameActive = true;
+                this.canGuess = true;
+                this.startBtn.disabled = true;
+                this.pauseBtn.disabled = false;
+                this.skipBtn.disabled = false;
+                this.hintBtn.disabled = false;
+                this.leaderboardEl.style.display = 'none';
+                this.usedCities = [];
+                this.correctAnswers = 0;
+                this.totalAnswers = 0;
+                this.score = 0;
+                this.round = 1;
+                this.streak = 0;
+                this.bestTime = null;
+                this.accuracy = 100;
+                
+                this.updateBlindMode();
+                this.nextRound();
+            }
+            
+            nextRound() {
+                if (!this.gameActive || this.round > 10 || this.cities.length === 0) {
+                    this.endGame();
+                    return;
+                }
+                
+                this.clearMarkers();
+                this.hintUsed = false;
+                this.hintBtn.disabled = false;
+                this.canGuess = true;
+                this.updateBlindMode();
+                
+                let targetDifficulty = Math.min(3, Math.ceil(this.round / 4));
+                
+                let availableCities = this.cities.filter(city => 
+                    !this.usedCities.includes(city.name)
+                );
+                
+                const preferredCities = availableCities.filter(city => 
+                    city.difficulty === targetDifficulty
+                );
+                
+                if (preferredCities.length > 0) {
+                    availableCities = preferredCities;
+                }
+                
+                if (availableCities.length === 0) {
+                    this.usedCities = [];
+                    availableCities = this.cities;
+                }
+                
+                this.currentCity = availableCities[Math.floor(Math.random() * availableCities.length)];
+                this.usedCities.push(this.currentCity.name);
+                
+                this.cityNameEl.textContent = this.currentCity.name;
+                
+                let hintText = this.currentCity.hint;
+                if (this.settings.countryHint) {
+                    hintText += ` • Located in ${this.currentCity.country}`;
+                }
+                
+                if (this.settings.blindMode) {
+                    hintText += ` • 👁️ Blind Mode Active`;
+                }
+                
+                this.cityHintEl.textContent = hintText;
+                
+                this.timeLeft = this.settings.timePressure ? 7000 : 10000;
+                this.startTime = Date.now();
+                this.startTimer();
+                this.updateDisplay();
+            }
+            
+            startTimer() {
+                clearInterval(this.timer);
+                this.timer = setInterval(() => {
+                    if (this.isPaused || !this.gameActive) return;
+                    
+                    this.timeLeft -= 100;
+                    const percentage = (this.timeLeft / (this.settings.timePressure ? 7000 : 10000)) * 100;
+                    this.timerFillEl.style.width = Math.max(0, percentage) + '%';
+                    
+                    if (this.timeLeft <= 0) {
+                        this.handleTimeout();
+                    }
+                }, 100);
+            }
+
+            showHint() {
+                if (!this.gameActive || !this.currentCity || this.hintUsed) return;
+                
+                this.hintUsed = true;
+                this.score = Math.max(0, this.score - 25);
+                this.hintBtn.disabled = true;
+                
+                const additionalHints = [
+                    `Population: ${this.currentCity.population || 'Large city'}`,
+                    `Famous landmark: ${this.currentCity.landmark || 'Historic center'}`,
+                    `Country: ${this.currentCity.country}`,
+                    `Coordinates: ${Math.abs(this.currentCity.lat).toFixed(1)}°${this.currentCity.lat >= 0 ? 'N' : 'S'}, ${Math.abs(this.currentCity.lng).toFixed(1)}°${this.currentCity.lng >= 0 ? 'E' : 'W'}`
+                ];
+                
+                const randomHint = additionalHints[Math.floor(Math.random() * additionalHints.length)];
+                this.cityHintEl.textContent += ` • ${randomHint}`;
+                
+                this.showFeedback('Hint used (-25 points)', 'incorrect');
+                this.updateDisplay();
+            }
+            
+            handleMapClick(e) {
+                if (!this.gameActive || this.isPaused || !this.currentCity || !this.canGuess) return;
+                
+                this.canGuess = false;
+                const clickLat = e.latlng.lat;
+                const clickLng = e.latlng.lng;
+                
+                const distance = this.calculateDistance(
+                    clickLat, clickLng,
+                    this.currentCity.lat, this.currentCity.lng
+                );
+                
+                const tolerance = this.getCurrentTolerance();
+                const isCorrect = distance < tolerance;
+                
+                this.addClickMarker(clickLat, clickLng, isCorrect);
+                this.totalAnswers++;
+                
+                if (isCorrect) {
+                    this.correctAnswers++;
+                    this.handleCorrectClick(distance);
+                } else {
+                    this.handleIncorrectClick(distance);
+                }
+                
+                this.updateAccuracy();
+            }
+
+            updateAccuracy() {
+                if (this.totalAnswers > 0) {
+                    this.accuracy = Math.round((this.correctAnswers / this.totalAnswers) * 100);
+                    this.accuracyEl.textContent = this.accuracy + '%';
+                }
+            }
+            
+            calculateDistance(lat1, lng1, lat2, lng2) {
+                const R = 6371;
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLng = (lng2 - lng1) * Math.PI / 180;
+                const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLng/2) * Math.sin(dLng/2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                return R * c;
+            }
+            
+            getCurrentTolerance() {
+                const zoom = this.map.getZoom();
+                const difficulty = Math.min(3, Math.ceil(this.round / 5));
+                
+                let baseTolerance = 500;
+                baseTolerance *= (6 - this.settings.difficulty) / 5;
+                
+                if (difficulty === 2) baseTolerance *= 0.6;
+                if (difficulty === 3) baseTolerance *= 0.4;
+                
+                const zoomFactor = Math.max(0.5, (8 - zoom) / 6);
+                return baseTolerance * zoomFactor;
+            }
+            
+            addClickMarker(lat, lng, isCorrect) {
+                const marker = L.circleMarker([lat, lng], {
+                    radius: 12,
+                    color: isCorrect ? '#27ae60' : '#e74c3c',
+                    fillColor: isCorrect ? 'rgba(39, 174, 96, 0.8)' : 'rgba(231, 76, 60, 0.8)',
+                    fillOpacity: 0.8,
+                    weight: 3
+                }).addTo(this.map);
+                
+                this.markers.push(marker);
+                
+                if (!this.settings.reducedAnim) {
+                    setTimeout(() => {
+                        if (this.map.hasLayer(marker)) {
+                            this.map.removeLayer(marker);
+                            this.markers = this.markers.filter(m => m !== marker);
+                        }
+                    }, 1500);
+                }
+            }
+            
+            showCityLocation() {
+                // Temporarily reveal the map in blind mode
+                if (this.settings.blindMode) {
+                    const mapElement = document.getElementById('map');
+                    const mapOverlay = document.getElementById('mapOverlay');
+                    mapElement.classList.remove('blind-mode');
+                    mapOverlay.style.display = 'none';
+                }
+                
+                const correctMarker = L.circleMarker([this.currentCity.lat, this.currentCity.lng], {
+                    radius: 15,
+                    color: '#27ae60',
+                    fillColor: '#2ecc71',
+                    fillOpacity: 0.9,
+                    weight: 4
+                }).addTo(this.map);
+                
+                correctMarker.bindPopup(`
+                    <div style="text-align: center; color: #2c3e50;">
+                        <strong>${this.currentCity.name}</strong><br>
+                        ${this.currentCity.country}<br>
+                        <small>${this.currentCity.landmark || 'Major city'}</small>
+                    </div>
+                `).openPopup();
+                
+                this.markers.push(correctMarker);
+                
+                setTimeout(() => {
+                    if (this.map.hasLayer(correctMarker)) {
+                        this.map.removeLayer(correctMarker);
+                        this.markers = this.markers.filter(m => m !== correctMarker);
+                    }
+                    // Re-enable blind mode after showing location
+                    if (this.settings.blindMode && this.gameActive) {
+                        this.updateBlindMode();
+                    }
+                }, 4000);
+            }
+            
+            clearMarkers() {
+                this.markers.forEach(marker => {
+                    if (this.map.hasLayer(marker)) {
+                        this.map.removeLayer(marker);
+                    }
+                });
+                this.markers = [];
+            }
+            
+            handleCorrectClick(distance) {
+                clearInterval(this.timer);
+                
+                const responseTime = Date.now() - this.startTime;
+                const maxTime = this.settings.timePressure ? 7000 : 10000;
+                const timeBonus = Math.max(0, Math.floor((this.timeLeft / maxTime) * 100));
+                const accuracyBonus = Math.max(0, Math.floor(300 - distance / 2));
+                const streakBonus = this.streak * 15;
+                const hintPenalty = this.hintUsed ? 25 : 0;
+                const blindModeBonus = this.settings.blindMode ? 50 : 0;
+                const roundScore = 100 + timeBonus + accuracyBonus + streakBonus + blindModeBonus - hintPenalty;
+                
+                this.score += roundScore;
+                this.streak++;
+                
+                if (!this.bestTime || responseTime < this.bestTime) {
+                    this.bestTime = responseTime;
+                }
+                
+                this.playSound('correct');
+                this.showCityLocation();
+                
+                let feedbackMessage = `🎉 +${roundScore} points! (${Math.round(distance)}km away)`;
+                if (this.settings.blindMode) {
+                    feedbackMessage += ` 👁️`;
+                }
+                
+                this.showFeedback(feedbackMessage, 'correct');
+                this.updateDisplay();
+                this.checkAchievements(responseTime);
+                
+                setTimeout(() => {
+                    this.round++;
+                    this.nextRound();
+                }, 3500);
+            }
+            
+            handleIncorrectClick(distance) {
+                this.score = Math.max(0, this.score - 25);
+                this.streak = 0;
+                this.playSound('incorrect');
+                this.showCityLocation();
+                this.showFeedback(`❌ -25 points (${Math.round(distance)}km away)`, 'incorrect');
+                this.updateDisplay();
+                
+                setTimeout(() => {
+                    this.round++;
+                    this.nextRound();
+                }, 3500);
+            }
+            
+            handleTimeout() {
+                clearInterval(this.timer);
+                this.streak = 0;
+                this.totalAnswers++;
+                this.canGuess = false;
+                this.updateAccuracy();
+                this.showCityLocation();
+                this.showFeedback('⏰ Time\'s up!', 'incorrect');
+                this.updateDisplay();
+                
+                setTimeout(() => {
+                    this.round++;
+                    this.nextRound();
+                }, 4000);
+            }
+            
+            skipCity() {
+                if (!this.gameActive || !this.currentCity) return;
+                
+                clearInterval(this.timer);
+                this.score = Math.max(0, this.score - 50);
+                this.streak = 0;
+                this.totalAnswers++;
+                this.canGuess = false;
+                this.updateAccuracy();
+                this.showCityLocation();
+                this.showFeedback('⏭️ City skipped (-50 points)', 'incorrect');
+                this.updateDisplay();
+                
+                setTimeout(() => {
+                    this.round++;
+                    this.nextRound();
+                }, 3500);
+            }
+            
+            playSound(type) {
+                if (!this.settings.sound) return;
+                
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    if (type === 'correct') {
+                        oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+                        oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
+                        oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2);
+                    } else if (type === 'incorrect') {
+                        oscillator.frequency.setValueAtTime(392, audioContext.currentTime);
+                        oscillator.frequency.setValueAtTime(329.63, audioContext.currentTime + 0.1);
+                        oscillator.frequency.setValueAtTime(261.63, audioContext.currentTime + 0.2);
+                    }
+                    
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                } catch (error) {
+                    console.log('Audio not supported');
+                }
+            }
+
+            showAchievement(title, description) {
+                const achievementEl = document.getElementById('achievement');
+                achievementEl.querySelector('.achievement-title').textContent = title;
+                achievementEl.querySelector('.achievement-text').textContent = description;
+                
+                achievementEl.classList.add('show');
+                this.playSound('correct');
+                
+                setTimeout(() => {
+                    achievementEl.classList.remove('show');
+                }, 4000);
+            }
+
+            checkAchievements(responseTime) {
+                const currentDate = new Date().toLocaleDateString();
+                
+                if (this.correctAnswers === 1 && !this.allAchievements.first_correct.unlocked) {
+                    this.allAchievements.first_correct.unlocked = true;
+                    this.allAchievements.first_correct.date = currentDate;
+                    this.allAchievements.first_correct.progress = 1;
+                    this.saveAchievements();
+                    this.showAchievement('🎯 First Success!', 'You got your first city correct!');
+                }
+                
+                if (this.streak >= 5 && !this.allAchievements.streak_5.unlocked) {
+                    this.allAchievements.streak_5.unlocked = true;
+                    this.allAchievements.streak_5.date = currentDate;
+                    this.allAchievements.streak_5.progress = 5;
+                    this.saveAchievements();
+                    this.showAchievement('🔥 Hot Streak!', 'Five correct answers in a row!');
+                }
+                
+                if (this.streak >= 10 && !this.allAchievements.streak_10.unlocked) {
+                    this.allAchievements.streak_10.unlocked = true;
+                    this.allAchievements.streak_10.date = currentDate;
+                    this.allAchievements.streak_10.progress = 10;
+                    this.saveAchievements();
+                    this.showAchievement('⚡ Lightning Streak!', 'Ten correct answers in a row!');
+                }
+                
+                if (responseTime < 2000 && !this.allAchievements.speed_demon.unlocked) {
+                    this.allAchievements.speed_demon.unlocked = true;
+                    this.allAchievements.speed_demon.date = currentDate;
+                    this.allAchievements.speed_demon.progress = 1;
+                    this.saveAchievements();
+                    this.showAchievement('⚡ Lightning Fast!', 'Answered in under 2 seconds!');
+                }
+                
+                if (this.score > 2000 && !this.allAchievements.expert.unlocked) {
+                    this.allAchievements.expert.unlocked = true;
+                    this.allAchievements.expert.date = currentDate;
+                    this.allAchievements.expert.progress = 2000;
+                    this.saveAchievements();
+                    this.showAchievement('🌍 Geography Expert!', 'Scored over 2000 points!');
+                }
+                
+                if (this.settings.blindMode && this.streak >= 3 && !this.allAchievements.blind_master.unlocked) {
+                    this.allAchievements.blind_master.unlocked = true;
+                    this.allAchievements.blind_master.date = currentDate;
+                    this.allAchievements.blind_master.progress = 3;
+                    this.saveAchievements();
+                    this.showAchievement('👁️ Blind Master!', '3+ streak in Blind Mode!');
+                }
+                
+                this.updateAchievementProgress();
+            }
+
+            updateAchievementProgress() {
+                this.allAchievements.world_traveler.progress = Math.min(
+                    this.allAchievements.world_traveler.maxProgress,
+                    this.allAchievements.world_traveler.progress + 1
+                );
+                
+                this.allAchievements.marathon.progress = this.stats.totalGames;
+                
+                this.allAchievements.high_roller.progress = Math.min(
+                    this.allAchievements.high_roller.maxProgress,
+                    this.stats.totalScore + this.score
+                );
+                
+                if (this.round === 10 && this.accuracy === 100) {
+                    this.allAchievements.perfect_game.progress = 10;
+                }
+                
+                this.saveAchievements();
+            }
+            
+            showFeedback(message, type) {
+                const existingFeedback = document.querySelector('.feedback');
+                if (existingFeedback) {
+                    existingFeedback.remove();
+                }
+                
+                const feedback = document.createElement('div');
+                feedback.className = `feedback ${type}`;
+                feedback.textContent = message;
+                document.body.appendChild(feedback);
+                
+                setTimeout(() => {
+                    if (feedback.parentNode) {
+                        feedback.parentNode.removeChild(feedback);
+                    }
+                }, 3000);
+            }
+            
+            togglePause() {
+                this.isPaused = !this.isPaused;
+                this.pauseBtn.innerHTML = this.isPaused ? 
+                    '<i class="fas fa-play"></i> Resume' : 
+                    '<i class="fas fa-pause"></i> Pause';
+                
+                if (this.isPaused) {
+                    this.cityNameEl.textContent = '⏸️ Game Paused';
+                    this.cityHintEl.textContent = 'Click Resume to continue playing';
+                    // Keep blind mode active when paused
+                    this.updateBlindMode();
+                } else if (this.currentCity) {
+                    this.cityNameEl.textContent = this.currentCity.name;
+                    let hintText = this.currentCity.hint;
+                    if (this.settings.countryHint) {
+                        hintText += ` • Located in ${this.currentCity.country}`;
+                    }
+                    if (this.settings.blindMode) {
+                        hintText += ` • 👁️ Blind Mode Active`;
+                    }
+                    this.cityHintEl.textContent = hintText;
+                    // Ensure blind mode is still active when resuming
+                    this.updateBlindMode();
+                }
+            }
+            
+            endGame() {
+                this.gameActive = false;
+                clearInterval(this.timer);
+                this.clearMarkers();
+                
+                this.startBtn.disabled = false;
+                this.pauseBtn.disabled = true;
+                this.skipBtn.disabled = true;
+                this.hintBtn.disabled = true;
+                
+                const mapElement = document.getElementById('map');
+                const mapOverlay = document.getElementById('mapOverlay');
+                mapElement.classList.remove('blind-mode');
+                mapOverlay.style.display = 'none';
+                
+                if (this.round > 1 && this.accuracy === 100 && !this.allAchievements.perfect_game.unlocked) {
+                    this.allAchievements.perfect_game.unlocked = true;
+                    this.allAchievements.perfect_game.date = new Date().toLocaleDateString();
+                    this.allAchievements.perfect_game.progress = 10;
+                    this.saveAchievements();
+                    this.showAchievement('🏆 Perfect Game!', '100% accuracy in a complete game!');
+                }
+                
+                this.saveHighScore();
+                this.saveStats();
+                this.updateAchievementProgress();
+                this.showGameOver();
+                this.showLeaderboard();
+            }
+            
+            showGameOver() {
+                let performanceMessage = '';
+                if (this.accuracy >= 90) performanceMessage = '🏆 Outstanding performance!';
+                else if (this.accuracy >= 75) performanceMessage = '🎖️ Great job!';
+                else if (this.accuracy >= 60) performanceMessage = '👍 Good effort!';
+                else performanceMessage = '📚 Keep practicing!';
+                
+                if (this.settings.blindMode && this.accuracy >= 70) {
+                    performanceMessage += ' 👁️ Blind Mode Master!';
+                }
+                
+                this.cityNameEl.innerHTML = `
+                    <div style="background: linear-gradient(45deg, var(--success-color), #2ecc71); color: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+                        <h2 style="margin-bottom: 15px;">🎉 Game Complete!</h2>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin: 20px 0;">
+                            <div>
+                                <div style="font-size: 2em; font-weight: bold;">${this.score}</div>
+                                <div style="opacity: 0.9;">Final Score</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 2em; font-weight: bold;">${this.round - 1}</div>
+                                <div style="opacity: 0.9;">Rounds</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 2em; font-weight: bold;">${this.accuracy}%</div>
+                                <div style="opacity: 0.9;">Accuracy</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 2em; font-weight: bold;">${this.bestTime ? (this.bestTime/1000).toFixed(1) + 's' : '--'}</div>
+                                <div style="opacity: 0.9;">Best Time</div>
+                            </div>
+                        </div>
+                        <p style="margin-top: 15px; font-size: 1.1em;">${performanceMessage}</p>
+                    </div>
+                `;
+                this.cityHintEl.textContent = '';
+            }
+            
+            resetGame() {
+                clearInterval(this.timer);
+                this.gameActive = false;
+                this.isPaused = false;
+                this.score = 0;
+                this.round = 1;
+                this.streak = 0;
+                this.bestTime = null;
+                this.accuracy = 100;
+                this.currentCity = null;
+                this.usedCities = [];
+                this.correctAnswers = 0;
+                this.totalAnswers = 0;
+                this.canGuess = true;
+                
+                this.startBtn.disabled = false;
+                this.pauseBtn.disabled = true;
+                this.skipBtn.disabled = true;
+                this.hintBtn.disabled = true;
+                this.pauseBtn.innerHTML = '<i class="fas fa-pause"></i> Pause';
+                
+                const mapElement = document.getElementById('map');
+                const mapOverlay = document.getElementById('mapOverlay');
+                mapElement.classList.remove('blind-mode');
+                mapOverlay.style.display = 'none';
+                
+                this.clearMarkers();
+                this.map.setView([20, 0], 2);
+                
+                this.cityNameEl.textContent = 'Click "Start Game" to begin!';
+                this.cityHintEl.textContent = 'Test your geography knowledge by clicking cities on the world map';
+                this.timerFillEl.style.width = '100%';
+                
+                this.updateDisplay();
+                this.showLeaderboard();
+            }
+            
+            updateDisplay() {
+                this.scoreEl.textContent = this.score.toLocaleString();
+                this.roundEl.textContent = this.round;
+                this.streakEl.textContent = this.streak;
+                this.bestTimeEl.textContent = this.bestTime ? (this.bestTime/1000).toFixed(1) + 's' : '--';
+                this.accuracyEl.textContent = this.accuracy + '%';
+            }
+            
+            saveHighScore() {
+                const newScore = {
+                    score: this.score,
+                    rounds: this.round - 1,
+                    accuracy: this.accuracy,
+                    bestTime: this.bestTime,
+                    date: new Date().toLocaleDateString(),
+                    achievements: Object.values(this.allAchievements).filter(ach => ach.unlocked).length,
+                    blindMode: this.settings.blindMode
+                };
+                
+                this.highScores.push(newScore);
+                this.highScores.sort((a, b) => b.score - a.score);
+                this.highScores = this.highScores.slice(0, 5);
+                
+                try {
+                    localStorage.setItem('civile_highscores', JSON.stringify(this.highScores));
+                } catch (error) {
+                    console.error('Error saving high scores:', error);
+                }
+            }
+            
+            showLeaderboard() {
+                if (this.highScores.length === 0) {
+                    this.scoresListEl.innerHTML = 'No scores yet!';
+                    return;
+                }
+                
+                this.leaderboardEl.style.display = 'block';
+                this.scoresListEl.innerHTML = this.highScores.map((score, index) => `
+                    <div class="score-entry">
+                        <div class="score-rank">#${index + 1}</div>
+                        <div class="score-details">
+                            <div class="score-main">${score.score.toLocaleString()} points ${score.blindMode ? '👁️' : ''}</div>
+                            <div class="score-meta">${score.rounds} rounds • ${score.accuracy}% accuracy</div>
+                        </div>
+                        <div class="score-date">${score.date}</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Global functions
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId + '-page').classList.add('active');
+            
+            if (pageId === 'achievements' && window.game) {
+                window.game.showAchievementsPage();
+            }
+        }
+
+        // Initialize game when page loads
+        window.addEventListener('load', () => {
+            window.game = new EnhancedCivileGame();
+        });
+
+        // Add smooth scrolling for better UX
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

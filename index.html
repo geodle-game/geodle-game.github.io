@@ -1,0 +1,2698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XLVG4HKZKP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XLVG4HKZKP');
+</script>
+    <!-- SEO Meta Tags -->
+<meta name="description" content="Geodle - Daily Geography Challenge Game. Guess countries from clues, test your geography knowledge, and compete with friends worldwide!">
+<meta name="keywords" content="geography game, country guessing, daily puzzle, educational game, world countries, geography quiz, Geodle">
+<meta name="author" content="Geodle">
+<meta name="robots" content="index, follow">
+
+<!-- Open Graph Meta Tags -->
+<meta property="og:title" content="Geodle - Daily Geography Challenge Game">
+<meta property="og:description" content="Test your geography knowledge with daily country guessing challenges. How many clues do you need to guess the mystery country?">
+<meta property="og:image" content="https://r293239.github.io/Geodle/assets/geodle-preview.png">
+<meta property="og:url" content="https://r293239.github.io/Geodle/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Geodle">
+
+<!-- Twitter Card Meta Tags -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Geodle - Daily Geography Challenge Game">
+<meta name="twitter:description" content="Guess countries from clues in this addictive geography puzzle game!">
+<meta name="twitter:image" content="https://r293239.github.io/Geodle/assets/geodle-preview.png">
+
+<!-- Structured Data for Rich Results -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Geodle",
+  "description": "Daily geography challenge game where players guess countries from progressive clues",
+  "url": "https://r293239.github.io/Geodle/",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "Any",
+  "permissions": "browser",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "SGD"
+  },
+  "author": {
+    "@type": "Organization",
+    "name": "Geodle"
+  }
+}
+</script>
+     <!-- Favicon and App Icons -->
+<link rel="icon" href="Geodle/assets/icon.png" type="image/png">
+<link rel="shortcut icon" href="Geodle/assets/icon.png" type="image/png">
+<link rel="apple-touch-icon" href="Geodle/assets/apple-touch-icon.png">
+<link rel="apple-touch-icon-precomposed" href="Geodle/assets/icon.png">
+    
+    <meta name="google-site-verification" content="4v_aC03LTCSXTOwGjrpNzbHNAjnB5hESrAOo4pMtIQo" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geodle - Daily Geography Clue Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3367D6"/>
+    
+    <!-- Load translations from external file -->
+    <script src="translations.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 520px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            z-index: -1;
+            animation: gradientShift 10s ease-in-out infinite;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Three-line Menu Button - Improved */
+        #menu-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            padding: 12px;
+            cursor: pointer;
+            z-index: 1001;
+            transition: all 0.3s ease;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #menu-button:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .menu-icon {
+            width: 24px;
+            height: 18px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .menu-icon span {
+            display: block;
+            height: 2px;
+            width: 100%;
+            background: white;
+            border-radius: 1px;
+            transition: all 0.25s ease-in-out;
+            position: relative;
+        }
+
+        .menu-icon span:nth-child(1) {
+            transform-origin: center;
+        }
+
+        .menu-icon span:nth-child(2) {
+            transform-origin: center;
+        }
+
+        .menu-icon span:nth-child(3) {
+            transform-origin: center;
+        }
+
+        /* Menu open animation */
+        #menu-button.open .menu-icon span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        #menu-button.open .menu-icon span:nth-child(2) {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+
+        #menu-button.open .menu-icon span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+
+        /* Menu Dropdown */
+        #menu-dropdown {
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 20px;
+            min-width: 240px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #menu-dropdown.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+
+        .menu-item {
+            display: block;
+            padding: 12px 16px;
+            color: #333;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .menu-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateX(5px);
+        }
+
+        .menu-item:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Toggle Switch Styles */
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #667eea;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Language Dropdown */
+        .language-dropdown {
+            position: relative;
+            margin-bottom: 8px;
+        }
+
+        .language-selector {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .language-selector:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .language-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border: 1px solid rgba(0,0,0,0.1);
+            max-height: 0;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            z-index: 1002;
+        }
+
+        .language-options.show {
+            max-height: 250px;
+        }
+
+        .language-options::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .language-options::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+            border-radius: 3px;
+        }
+
+        .language-options::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 3px;
+        }
+
+        .language-options::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+        }
+
+        .language-option {
+            padding: 10px 16px;
+            color: #333;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .language-option:last-child {
+            border-bottom: none;
+        }
+
+        .language-option:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .language-option.selected {
+            background: rgba(102, 126, 234, 0.15);
+            font-weight: 600;
+        }
+
+        .dropdown-arrow {
+            transition: transform 0.3s ease;
+        }
+
+        .language-dropdown.open .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        /* Loading Screen */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        #loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loading-content {
+            text-align: center;
+            color: white;
+        }
+
+        .loading-logo {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            animation: logoFloat 2s ease-in-out infinite;
+        }
+
+        .loading-text {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            animation: fadeInOut 1.5s ease-in-out infinite;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        .loading-dots {
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            animation: dotBounce 1.4s ease-in-out infinite both;
+        }
+
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+        .loading-dot:nth-child(3) { animation-delay: 0s; }
+
+        @keyframes logoFloat {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% {
+                opacity: 0.7;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes dotBounce {
+            0%, 80%, 100% {
+                transform: scale(0);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* One-time Tutorial Styles */
+        #tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s ease;
+        }
+
+        #tutorial-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #tutorial-modal {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 24px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            transform: translateY(50px) scale(0.95);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #tutorial-overlay.show #tutorial-modal {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        #tutorial-content {
+            padding: 30px;
+        }
+
+        .tutorial-slide {
+            display: none;
+            text-align: center;
+        }
+
+        .tutorial-slide.active {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .tutorial-slide h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tutorial-slide p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+        }
+
+        .tutorial-visual {
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 25px 0;
+            border: 2px dashed rgba(102, 126, 234, 0.3);
+            animation: pulseVisual 2s infinite;
+        }
+
+        @keyframes pulseVisual {
+            0%, 100% {
+                border-color: rgba(102, 126, 234, 0.3);
+                transform: scale(1);
+            }
+            50% {
+                border-color: rgba(102, 126, 234, 0.6);
+                transform: scale(1.02);
+            }
+        }
+
+        .visual-map {
+            width: 100%;
+            height: 150px;
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .visual-map::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulsePin 2s infinite;
+        }
+
+        @keyframes pulsePin {
+            0%, 100% {
+                transform: translate(-50%, -50%) scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7);
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.2);
+                box-shadow: 0 0 0 10px rgba(255, 107, 107, 0);
+            }
+        }
+
+        .visual-clue {
+            background: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 500;
+            color: #333;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            animation: floatUpDown 3s ease-in-out infinite;
+        }
+
+        @keyframes floatUpDown {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .visual-progress {
+            width: 100%;
+            height: 20px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .visual-progress-fill {
+            width: 30%;
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            border-radius: 10px;
+            animation: progressGrow 3s infinite;
+        }
+
+        @keyframes progressGrow {
+            0%, 100% { width: 30%; }
+            50% { width: 60%; }
+        }
+
+        .visual-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin: 15px 0;
+            background: white;
+            animation: inputFocus 2s infinite;
+        }
+
+        @keyframes inputFocus {
+            0%, 100% {
+                border-color: #667eea;
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+            }
+            50% {
+                border-color: #4CAF50;
+                box-shadow: 0 0 0 5px rgba(76, 175, 80, 0.2);
+            }
+        }
+
+        .tutorial-dots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 25px 0;
+        }
+
+        .tutorial-dot {
+            width: 10px;
+            height: 10px;
+            background: #ddd;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tutorial-dot.active {
+            background: #667eea;
+            transform: scale(1.2);
+        }
+
+        .tutorial-dot:hover {
+            background: #764ba2;
+        }
+
+        .tutorial-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .tutorial-btn {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .tutorial-btn.skip {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        .tutorial-btn.next {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tutorial-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .tutorial-btn.skip:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+
+        .tutorial-btn.next:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        .tutorial-btn:active {
+            transform: translateY(0);
+        }
+
+        .feature-list {
+            text-align: left;
+            margin: 25px 0;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 12px;
+            animation: slideInRight 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .feature-item:nth-child(1) { animation-delay: 0.1s; }
+        .feature-item:nth-child(2) { animation-delay: 0.2s; }
+        .feature-item:nth-child(3) { animation-delay: 0.3s; }
+        .feature-item:nth-child(4) { animation-delay: 0.4s; }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .feature-text h4 {
+            color: #333;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .feature-text p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 40px rgba(255,255,255,0.2);
+            letter-spacing: -0.02em;
+            animation: fadeInDown 0.8s ease;
+            position: relative;
+        }
+        
+        #worldMap {
+            height: 320px;
+            width: 100%;
+            border-radius: 20px;
+            margin: 25px 0;
+            box-shadow: 
+                0 20px 60px rgba(0,0,0,0.3),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.2);
+            animation: fadeInUp 0.8s ease 0.2s both;
+            transition: transform 0.3s ease;
+        }
+        
+        #worldMap:hover {
+            transform: translateY(-2px) scale(1.001);
+        }
+        
+        #clueBox {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px) saturate(180%);
+            padding: 24px;
+            margin: 25px 0;
+            font-weight: 500;
+            font-size: 1.25em;
+            border-radius: 18px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 
+                0 15px 50px rgba(0,0,0,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.4);
+            color: #333;
+            animation: fadeInUp 0.8s ease 0.3s both;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #clueBox::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 2s ease;
+        }
+        
+        #clueBox:hover::before {
+            left: 100%;
+        }
+        
+        #clueBox:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 20px 60px rgba(0,0,0,0.25),
+                inset 0 1px 0 rgba(255,255,255,0.5);
+        }
+        
+        #progressInfo {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.1em;
+            color: rgba(255,255,255,0.95);
+            font-weight: 500;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            animation: fadeInUp 0.8s ease 0.4s both;
+        }
+        
+        #progressBar {
+            width: 100%;
+            height: 28px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 14px;
+            overflow: hidden;
+            margin: 15px 0;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 
+                inset 0 2px 4px rgba(0,0,0,0.1),
+                0 4px 20px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        #progressFill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A, #CDDC39);
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 10%;
+            border-radius: 14px;
+            box-shadow: 
+                0 0 30px rgba(76, 175, 80, 0.6),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #progressFill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 2s infinite;
+            border-radius: 14px;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        #guessForm {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 20px;
+            animation: fadeInUp 0.8s ease 0.5s both;
+        }
+        
+        #guessInput {
+            flex: 1;
+            font-size: 1.1em;
+            padding: 18px 22px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 16px 0 0 16px;
+            outline: none;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 400;
+            color: #333;
+            font-family: inherit;
+        }
+        
+        #guessInput:focus {
+            border-color: #4CAF50;
+            box-shadow: 
+                0 0 30px rgba(76, 175, 80, 0.4),
+                inset 0 1px 0 rgba(255,255,255,0.5);
+            transform: translateY(-2px);
+            background: rgba(255,255,255,1);
+        }
+        
+        #guessInput::placeholder {
+            color: rgba(0,0,0,0.5);
+            transition: opacity 0.3s ease;
+        }
+        
+        #guessInput:focus::placeholder {
+            opacity: 0.7;
+        }
+        
+        #guessButton {
+            padding: 18px 26px;
+            font-size: 1.1em;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 0 16px 16px 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            position: relative;
+            overflow: hidden;
+            font-family: inherit;
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        #guessButton::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        #guessButton:hover:not(:disabled)::before {
+            left: 100%;
+        }
+        
+        #guessButton:hover:not(:disabled) {
+            background: linear-gradient(135deg, #218838, #1e7e34);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(40, 167, 69, 0.5);
+        }
+        
+        #guessButton:active {
+            transform: translateY(0);
+        }
+        
+        #guessButton:disabled {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+            color: rgba(255,255,255,0.8);
+        }
+        
+        #feedback {
+            text-align: center;
+            font-weight: 600;
+            margin: 20px 0;
+            padding: 16px;
+            border-radius: 12px;
+            transition: all 0.4s ease;
+            font-size: 1.1em;
+            min-height: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Mode Selector Styles */
+        .mode-selector {
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            text-align: center;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            animation: fadeInUp 0.8s ease 0.1s both;
+            box-shadow: 
+                0 15px 50px rgba(0,0,0,0.15),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        .mode-selector h3 {
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .mode-btn {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.25);
+            padding: 14px 24px;
+            margin: 0 8px 12px 8px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .mode-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .mode-btn:hover::before {
+            left: 100%;
+        }
+
+        .mode-btn:hover {
+            background: rgba(255,255,255,0.25);
+            border-color: rgba(255,255,255,0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            color: white;
+            text-decoration: none;
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #FF6B6B, #FF5252);
+            border-color: rgba(255,255,255,0.3);
+            color: white;
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        .mode-btn.active:hover {
+            background: linear-gradient(135deg, #FF5252, #FF3D3D);
+            box-shadow: 0 10px 35px rgba(255, 107, 107, 0.5);
+        }
+
+        .mode-description {
+            font-size: 0.95rem;
+            margin-top: 15px;
+            opacity: 0.9;
+            font-weight: 300;
+            text-shadow: 0 1px 5px rgba(0,0,0,0.2);
+        }
+        
+        /* Card Styles */
+        .glass-card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 18px;
+            padding: 24px;
+            margin: 20px 0;
+            box-shadow: 
+                0 15px 50px rgba(0,0,0,0.15),
+                inset 0 1px 0 rgba(255,255,255,0.4);
+            border: 1px solid rgba(255,255,255,0.3);
+            animation: fadeInUp 0.6s ease both;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 20px 60px rgba(0,0,0,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.5);
+        }
+        
+        .glass-card h3 {
+            margin-bottom: 18px;
+            color: #333;
+            font-weight: 600;
+            font-size: 1.3em;
+        }
+        
+        #pastHints, #history {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 18px;
+            padding: 24px;
+            margin: 20px 0;
+            box-shadow: 
+                0 15px 50px rgba(0,0,0,0.15),
+                inset 0 1px 0 rgba(255,255,255,0.4);
+            border: 1px solid rgba(255,255,255,0.3);
+            animation: fadeInUp 0.6s ease both;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        #pastHints:hover, #history:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 20px 60px rgba(0,0,0,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.5);
+        }
+        
+        #pastHints h3, #history h3 {
+            margin-bottom: 18px;
+            color: #333;
+            font-weight: 600;
+            font-size: 1.3em;
+        }
+        
+        #pastHintsList, #historyList {
+            list-style: none;
+            padding-left: 0;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+        
+        #pastHintsList::-webkit-scrollbar, #historyList::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #pastHintsList::-webkit-scrollbar-track, #historyList::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+            border-radius: 4px;
+        }
+        
+        #pastHintsList::-webkit-scrollbar-thumb, #historyList::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+        
+        #pastHintsList::-webkit-scrollbar-thumb:hover, #historyList::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+        }
+        
+        #pastHintsList li {
+            padding: 14px 18px;
+            background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
+            margin-bottom: 10px;
+            border-radius: 12px;
+            font-size: 0.95em;
+            border-left: 4px solid #4CAF50;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideInLeft 0.5s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        #pastHintsList li:hover {
+            transform: translateX(8px) translateY(-1px);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.2);
+            background: linear-gradient(135deg, #dff5df, #e8f5e8);
+        }
+        
+        #historyList li {
+            padding: 16px 20px;
+            background: rgba(255,255,255,0.8);
+            margin-bottom: 10px;
+            border-radius: 14px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            font-size: 0.95em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideInRight 0.5s ease;
+            border: 1px solid rgba(0,0,0,0.05);
+            backdrop-filter: blur(10px);
+        }
+        
+        #historyList li:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+        }
+        
+        #historyList li.correct {
+            background: linear-gradient(135deg, rgba(200, 230, 201, 0.9), rgba(232, 245, 232, 0.9));
+            color: #2e7d32;
+            border-left: 4px solid #4CAF50;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+        }
+        
+        #historyList li.incorrect {
+            background: linear-gradient(135deg, rgba(255, 205, 210, 0.9), rgba(255, 235, 238, 0.9));
+            color: #c62828;
+            border-left: 4px solid #f44336;
+            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.2);
+        }
+        
+        #streak {
+            text-align: center;
+            font-size: 1.25em;
+            margin: 20px 0;
+            color: white;
+            font-weight: 600;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.2);
+            animation: fadeInUp 0.8s ease 0.6s both;
+            box-shadow: 
+                0 10px 40px rgba(0,0,0,0.1),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+        
+        /* Enhanced Button Styles */
+        .btn {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            position: relative;
+            overflow: hidden;
+            margin: 8px;
+            font-family: inherit;
+            backdrop-filter: blur(10px);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+        }
+        
+        .btn:active {
+            transform: translateY(-1px);
+        }
+        
+        #resetBtn {
+            background: linear-gradient(135deg, #dc3545, #bd2130);
+            color: white;
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        #resetBtn:hover {
+            background: linear-gradient(135deg, #c82333, #a71e2a);
+            box-shadow: 0 12px 35px rgba(220, 53, 69, 0.5);
+            transform: translateY(-3px);
+        }
+        
+        #resetWinsBtn {
+            background: linear-gradient(135deg, #6f42c1, #5a2d91);
+            color: white;
+            box-shadow: 0 8px 25px rgba(111, 66, 193, 0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        #resetWinsBtn:hover {
+            background: linear-gradient(135deg, #5a2d91, #4e2779);
+            box-shadow: 0 12px 35px rgba(111, 66, 193, 0.5);
+            transform: translateY(-3px);
+        }
+        
+        #endScreen {
+            background: linear-gradient(135deg, rgba(194, 240, 194, 0.95), rgba(168, 230, 168, 0.95));
+            backdrop-filter: blur(20px);
+            padding: 30px;
+            border-radius: 20px;
+            margin-top: 25px;
+            text-align: center;
+            display: none;
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 
+                0 20px 60px rgba(0,0,0,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.4);
+            animation: bounceIn 0.8s ease;
+        }
+        
+        #shareBtn, #newGameBtn {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            margin: 10px 8px;
+            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        #shareBtn:hover, #newGameBtn:hover {
+            background: linear-gradient(135deg, #0056b3, #004085);
+            box-shadow: 0 12px 35px rgba(0, 123, 255, 0.5);
+            transform: translateY(-3px);
+        }
+        
+        #newGameBtn {
+            background: linear-gradient(135deg, #fd7e14, #e8590c);
+            box-shadow: 0 8px 25px rgba(253, 126, 20, 0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        #newGameBtn:hover {
+            background: linear-gradient(135deg, #e8590c, #d63384);
+            box-shadow: 0 12px 35px rgba(253, 126, 20, 0.5);
+            transform: translateY(-3px);
+        }
+        
+        #dailyLimitMsg, #loadingError {
+            background: linear-gradient(135deg, rgba(255, 211, 211, 0.95), rgba(255, 235, 238, 0.95));
+            backdrop-filter: blur(20px);
+            border: 1px solid #d64c4c;
+            padding: 24px;
+            border-radius: 18px;
+            text-align: center;
+            color: #d64c4c;
+            font-weight: 600;
+            margin: 25px 0;
+            box-shadow: 
+                0 15px 50px rgba(214, 76, 76, 0.2),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+            animation: shakeX 0.8s ease;
+        }
+        
+        #help-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 16px 28px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0, 123, 255, 0.4);
+            text-decoration: none;
+            z-index: 9999;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2);
+            font-family: inherit;
+        }
+
+        #help-button:hover {
+            background: linear-gradient(135deg, #0056b3, #004085);
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(0, 123, 255, 0.5);
+            color: white;
+            text-decoration: none;
+        }
+        
+        /* Enhanced Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes shakeX {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            10%, 30%, 50%, 70%, 90% {
+                transform: translateX(-8px);
+            }
+            20%, 40%, 60%, 80% {
+                transform: translateX(8px);
+            }
+        }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+                margin-bottom: 20px;
+            }
+
+            #menu-button {
+                top: 15px;
+                left: 15px;
+            }
+
+            #menu-dropdown {
+                top: 75px;
+                left: 15px;
+                right: 15px;
+                width: auto;
+            }
+            
+            .mode-btn {
+                display: block;
+                margin: 12px auto;
+                width: 90%;
+                max-width: 280px;
+                padding: 16px 20px;
+            }
+            
+            #worldMap {
+                height: 280px;
+                margin: 20px 0;
+            }
+            
+            #clueBox {
+                font-size: 1.1em;
+                padding: 20px 16px;
+            }
+            
+            #guessForm {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            #guessInput, #guessButton {
+                border-radius: 14px;
+            }
+            
+            #guessInput {
+                padding: 16px 18px;
+            }
+            
+            #guessButton {
+                padding: 16px 20px;
+            }
+            
+            #pastHints, #history {
+                padding: 20px 16px;
+            }
+            
+            .btn {
+                padding: 12px 20px;
+                font-size: 0.9em;
+            }
+            
+            #help-button {
+                bottom: 20px;
+                right: 20px;
+                padding: 14px 22px;
+                font-size: 13px;
+            }
+            
+            #tutorial-modal {
+                width: 95%;
+                margin: 10px;
+            }
+            
+            #tutorial-content {
+                padding: 20px;
+            }
+            
+            .tutorial-slide h2 {
+                font-size: 1.8rem;
+            }
+            
+            .tutorial-slide p {
+                font-size: 1rem;
+            }
+            
+            .visual-map {
+                height: 120px;
+            }
+            
+            .tutorial-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .tutorial-btn {
+                width: 100%;
+            }
+            
+            .loading-logo {
+                font-size: 3rem;
+            }
+            
+            .loading-text {
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 12px;
+            }
+            
+            h1 {
+                font-size: 1.9rem;
+            }
+            
+            #worldMap {
+                height: 240px;
+            }
+            
+            .mode-selector {
+                padding: 20px 16px;
+            }
+            
+            .mode-btn {
+                width: 95%;
+                padding: 14px 18px;
+                font-size: 0.95rem;
+            }
+            
+            #clueBox {
+                font-size: 1.05em;
+                padding: 18px 14px;
+            }
+            
+            #pastHints, #history {
+                padding: 18px 14px;
+            }
+            
+            #pastHintsList, #historyList {
+                max-height: 180px;
+            }
+            
+            .btn {
+                padding: 12px 18px;
+                font-size: 0.85em;
+                margin: 6px;
+            }
+            
+            #endScreen {
+                padding: 24px 18px;
+            }
+            
+            #tutorial-content {
+                padding: 15px;
+            }
+            
+            .tutorial-slide h2 {
+                font-size: 1.5rem;
+                margin-bottom: 15px;
+            }
+            
+            .tutorial-slide p {
+                font-size: 0.95rem;
+                margin-bottom: 20px;
+            }
+            
+            .tutorial-visual {
+                padding: 15px;
+                margin: 20px 0;
+            }
+            
+            .feature-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+                padding: 15px;
+            }
+            
+            .loading-logo {
+                font-size: 2.5rem;
+            }
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        button:focus,
+        input:focus,
+        a:focus {
+            outline: 2px solid rgba(255,255,255,0.8);
+            outline-offset: 2px;
+        }
+        
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        
+        .pulse {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        /* Terms & Cookies Consent Banner */
+        #consent-banner {
+            position: fixed;
+            bottom: -100px;
+            left: 0;
+            width: 100%;
+            background-color: #222;
+            color: #fff;
+            padding: 15px 20px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+            z-index: 1000;
+            transition: bottom 0.5s ease-in-out;
+        }
+        #consent-banner.show { bottom: 0; }
+        #consent-banner button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        #consent-banner button:hover { background-color: #45a049; }
+        #consent-banner a {
+            color: #4CAF50;
+            text-decoration: underline;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+        #consent-banner span { flex: 1 1 auto; margin-right: 10px; }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            background-color: rgba(0,0,0,0.6);
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 50px auto;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 700px;
+            font-family: Arial, sans-serif;
+            color: #000;
+            line-height: 1.5;
+            position: relative;
+        }
+        .modal-content h2 { text-align: center; }
+        .modal-content h3 { margin-top: 15px; }
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 18px;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Loading Screen -->
+<div id="loading-screen">
+    <div class="loading-content">
+        <div class="loading-logo">Geodle</div>
+        <div class="loading-text">Loading geography data...</div>
+        <div class="loading-spinner"></div>
+        <div class="loading-dots">
+            <div class="loading-dot"></div>
+            <div class="loading-dot"></div>
+            <div class="loading-dot"></div>
+        </div>
+    </div>
+</div>
+
+<!-- One-time Tutorial -->
+<div id="tutorial-overlay">
+    <div id="tutorial-modal">
+        <div id="tutorial-content">
+            <!-- Slide 1: Welcome -->
+            <div class="tutorial-slide active" id="slide1">
+                <h2>🎮 Welcome to Geodle!</h2>
+                <p>Guess countries from progressive clues in this daily geography challenge.</p>
+                <div class="tutorial-visual">
+                    <div class="visual-map"></div>
+                    <div class="visual-clue">📍 Clue appears here</div>
+                </div>
+                <div class="tutorial-dots">
+                    <div class="tutorial-dot active" data-slide="1"></div>
+                    <div class="tutorial-dot" data-slide="2"></div>
+                    <div class="tutorial-dot" data-slide="3"></div>
+                    <div class="tutorial-dot" data-slide="4"></div>
+                </div>
+                <div class="tutorial-buttons">
+                    <button class="tutorial-btn skip" id="skip-tutorial">Skip Tutorial</button>
+                    <button class="tutorial-btn next" id="next-slide">Next</button>
+                </div>
+            </div>
+
+            <!-- Slide 2: How to Play -->
+            <div class="tutorial-slide" id="slide2">
+                <h2>🎯 How to Play</h2>
+                <p>You'll get 10 clues to guess the mystery country. Each clue reveals more information.</p>
+                <div class="tutorial-visual">
+                    <div class="visual-progress">
+                        <div class="visual-progress-fill"></div>
+                    </div>
+                    <div class="visual-clue">Progress bar shows your clue count</div>
+                </div>
+                <div class="tutorial-dots">
+                    <div class="tutorial-dot" data-slide="1"></div>
+                    <div class="tutorial-dot active" data-slide="2"></div>
+                    <div class="tutorial-dot" data-slide="3"></div>
+                    <div class="tutorial-dot" data-slide="4"></div>
+                </div>
+                <div class="tutorial-buttons">
+                    <button class="tutorial-btn skip" id="prev-slide">Back</button>
+                    <button class="tutorial-btn next" id="next-slide-2">Next</button>
+                </div>
+            </div>
+
+            <!-- Slide 3: Features -->
+            <div class="tutorial-slide" id="slide3">
+                <h2>✨ Key Features</h2>
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">🌍</div>
+                        <div class="feature-text">
+                            <h4>Interactive Map</h4>
+                            <p>Explore the world map as you play</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-text">
+                            <h4>Track Progress</h4>
+                            <p>Monitor your streak and total wins</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🔄</div>
+                        <div class="feature-text">
+                            <h4>Multiple Modes</h4>
+                            <p>Try different game modes for variety</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🌐</div>
+                        <div class="feature-text">
+                            <h4>Multi-language</h4>
+                            <p>Play in your preferred language</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="tutorial-dots">
+                    <div class="tutorial-dot" data-slide="1"></div>
+                    <div class="tutorial-dot" data-slide="2"></div>
+                    <div class="tutorial-dot active" data-slide="3"></div>
+                    <div class="tutorial-dot" data-slide="4"></div>
+                </div>
+                <div class="tutorial-buttons">
+                    <button class="tutorial-btn skip" id="prev-slide-2">Back</button>
+                    <button class="tutorial-btn next" id="next-slide-3">Next</button>
+                </div>
+            </div>
+
+            <!-- Slide 4: Tips & Start -->
+            <div class="tutorial-slide" id="slide4">
+                <h2>🚀 Ready to Play!</h2>
+                <p>Here are some tips to get you started:</p>
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">💡</div>
+                        <div class="feature-text">
+                            <h4>Think Broadly</h4>
+                            <p>Early clues are general - think continents, regions</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🎯</div>
+                        <div class="feature-text">
+                            <h4>Use History</h4>
+                            <p>Review past hints to narrow down options</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🏆</div>
+                        <div class="feature-text">
+                            <h4>Build Streak</h4>
+                            <p>Win consecutive games to increase your streak</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🌐</div>
+                        <div class="feature-text">
+                            <h4>Explore Modes</h4>
+                            <p>Try different game modes for new challenges</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="tutorial-dots">
+                    <div class="tutorial-dot" data-slide="1"></div>
+                    <div class="tutorial-dot" data-slide="2"></div>
+                    <div class="tutorial-dot" data-slide="3"></div>
+                    <div class="tutorial-dot active" data-slide="4"></div>
+                </div>
+                <div class="tutorial-buttons">
+                    <button class="tutorial-btn skip" id="prev-slide-3">Back</button>
+                    <button class="tutorial-btn next" id="start-playing">Start Playing!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Three-line Menu Button -->
+<div id="menu-button">
+    <div class="menu-icon">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</div>
+
+<!-- Menu Dropdown -->
+<div id="menu-dropdown">
+    <button class="menu-item" id="menu-terms" data-i18n="termsConditions">Terms & Conditions</button>
+    <button class="menu-item" id="menu-privacy" data-i18n="privacyPolicy">Privacy Policy</button>
+    <button class="menu-item" id="menu-tutorial" data-i18n="showTutorial">Show Tutorial Again</button>
+    
+    <!-- Language Selector -->
+    <div class="language-dropdown" id="language-dropdown">
+        <div class="language-selector" id="language-selector">
+            <span id="current-language">English</span>
+            <span class="dropdown-arrow">▼</span>
+        </div>
+        <div class="language-options" id="language-options"></div>
+    </div>
+    
+    <!-- Music Toggle -->
+    <div class="toggle-item">
+        <span data-i18n="music">Music</span>
+        <label class="switch">
+            <input type="checkbox" id="music-toggle">
+            <span class="slider"></span>
+        </label>
+    </div>
+</div>
+
+<h1>Geodle</h1>
+
+<!-- Mode Selector -->
+<div class="mode-selector">
+    <h3 data-i18n="gameModes">Game Modes</h3>
+    <a href="https://r293239.github.io/Geodle/path-mode.html" class="mode-btn active" id="pathModeBtn">Routele</a>
+    <a href="country-mode.html" class="mode-btn" id="countryModeBtn">Countryle</a>
+    <a href="flag-mode.html" class="mode-btn" id="flagModeBtn">Flagle</a>
+    <a href="https://r293239.github.io/Geodle/civile" class="mode-btn" id="civileModeBtn">Civile</a>
+    <a href="https://r293239.github.io/Geodle/bordle" class="mode-btn" id="bordleModeBtn">Bordle</a>
+    <a href="https://r293239.github.io/Geodle/histle" class="mode-btn" id="historyModeBtn">Histle</a>
+    <a href="hangle.html" class="mode-btn" id="hangleModeBtn">Hangle</a>
+    <div class="mode-description">
+        <span id="modeDescription" data-i18n="pathModeDesc">Get geographic clues and guess the mystery location!</span>
+    </div>
+</div>
+
+<div id="worldMap"></div>
+<div id="progressInfo">
+    <div><span data-i18n="clue">Clue</span> <span id="currentClue">1</span> <span data-i18n="of">of</span> 10</div>
+    <div id="progressBar">
+        <div id="progressFill"></div>
+    </div>
+</div>
+<div id="clueBox" data-i18n="loadingClue">Loading clue...</div>
+<form id="guessForm">
+    <input type="text" id="guessInput" data-i18n-placeholder="guessPlaceholder" placeholder="Type your guess here" autocomplete="off" />
+    <button id="guessButton" type="submit" data-i18n="guess">Guess</button>
+</form>
+<div id="feedback"></div>
+<div id="streak"><span data-i18n="totalWins">Total Wins</span>: 0</div>
+<div style="text-align: center;">
+    <button id="resetBtn" class="btn" data-i18n="resetGame">Reset Game</button>
+    <button id="resetWinsBtn" class="btn" data-i18n="resetWinCount">Reset Win Count</button>
+</div>
+<div id="pastHints">
+    <h3 data-i18n="pastHints">Past Hints</h3>
+    <ul id="pastHintsList"></ul>
+</div>
+<div id="history">
+    <h3 data-i18n="guessHistory">Guess History</h3>
+    <ul id="historyList"></ul>
+</div>
+<div id="endScreen">
+    <div id="resultMsg"></div>
+    <button id="shareBtn" class="btn" data-i18n="shareScore">Share My Score</button>
+    <button id="newGameBtn" class="btn" data-i18n="newGame">New Game</button>
+</div>
+<div id="dailyLimitMsg" style="display:none;">
+    <span data-i18n="dailyLimit">You've already played today! Come back tomorrow 👀</span>
+</div>
+<div id="loadingError" style="display:none;">
+    <h3 data-i18n="dataLoadingError">Data Loading Error</h3>
+    <p data-i18n="dataLoadingErrorDesc">Could not load the geography data file (data.js). Please make sure the file exists and is properly formatted.</p>
+</div>
+
+<!-- Sticky Help Button -->
+<a id="help-button" 
+   href="https://docs.google.com/forms/d/e/1FAIpQLSf66hYSFxnaQXvXmHlWU2MIGwIn3dkmiQ5iguGazXRKw4cSEg/viewform?usp=sharing&ouid=111077547070042896084" 
+   target="_blank" 
+   rel="noopener noreferrer"
+   data-i18n="helpImprove">Help Us Improve</a>
+
+<!-- Terms & Cookies Consent Banner -->
+<div id="consent-banner">
+    <span>
+        We use cookies to improve your experience. By using this site, you agree to our 
+        <a id="open-terms">Terms & Conditions</a> and 
+        <a id="open-privacy">Privacy Policy</a>.
+    </span>
+    <button id="accept-btn">Accept</button>
+</div>
+
+<!-- Terms Modal -->
+<div id="terms-modal" class="modal">
+    <div class="modal-content">
+        <button class="close-modal" id="close-terms">&times;</button>
+        <h2>Terms & Conditions</h2>
+        <p>Effective Date: August 21, 2025</p>
+
+        <h3>1. Agreement to Terms</h3>
+        <p>By clicking "I Agree" or by opening and playing the Game, you acknowledge that:</p>
+        <ul>
+            <li>You have read, understood, and accepted these Terms and the associated Privacy Policy.</li>
+            <li>Your use of the Game is voluntary and at your own risk.</li>
+            <li>You agree to comply with all rules and restrictions outlined in these Terms.</li>
+        </ul>
+        <p>If you do not agree with any part of these Terms, you must not use the Game.</p>
+
+        <h3>2. Use of the Game</h3>
+        <ul>
+            <li>Geodle is intended for entertainment and educational purposes only.</li>
+            <li>You may use the Game on your personal device only. You may not:
+                <ul>
+                    <li>Copy, distribute, modify, or create derivative works without permission</li>
+                    <li>Reverse engineer or attempt to extract the source code</li>
+                    <li>Use the Game for commercial purposes without written consent</li>
+                </ul>
+            </li>
+            <li>We may update or modify the Game at any time. Continued use constitutes acceptance of updates.</li>
+        </ul>
+
+        <h3>3. Account and Data</h3>
+        <ul>
+            <li>Geodle does not require personal accounts. All game progress, scores, and settings are stored locally on your device via local storage.</li>
+            <li>You are responsible for maintaining your local storage. We are not responsible for lost progress due to clearing storage or device changes.</li>
+            <li>The Game does not collect, transmit, or store personal information externally.</li>
+        </ul>
+
+        <h3>4. Content and Intellectual Property</h3>
+        <ul>
+            <li>All content, including graphics, text, sounds, and mechanics, is owned by Reuben Yee or used with permission.</li>
+            <li>You may not reproduce, distribute, publicly display, or create derivative works without written consent.</li>
+            <li>Any feedback or suggestions you provide become our property and may be used to improve the Game.</li>
+        </ul>
+
+        <h3>5. Third-Party Services</h3>
+        <ul>
+            <li>The Game may link to external websites. We are not responsible for content or privacy practices of these sites.</li>
+        </ul>
+
+        <h3>6. Children</h3>
+        <ul>
+            <li>The Game is safe for all ages. No personal info is collected, so children under 13 can play safely.</li>
+            <li>Parents/guardians can manage local storage to remove game data at any time.</li>
+        </ul>
+
+        <h3>7. Limitation of Liability</h3>
+        <ul>
+            <li>The Game is provided "as is" without warranties.</li>
+            <li>We are not responsible for any damages or losses arising from:
+                <ul>
+                    <li>Use of the Game</li>
+                    <li>Loss of local storage data</li>
+                    <li>Technical issues or interruptions</li>
+                </ul>
+            </li>
+            <li>By agreeing, you acknowledge you use the Game at your own risk.</li>
+        </ul>
+
+        <h3>8. Governing Law</h3>
+        <p>These Terms are governed by Singapore law.</p>
+
+        <h3>9. Changes to Terms</h3>
+        <p>We may update these Terms. Continued use constitutes acceptance of updates.</p>
+
+        <h3>10. Contact</h3>
+        <p>Email: reubenyee2012@gmail.com</p>
+    </div>
+</div>
+
+<!-- Privacy Modal -->
+<div id="privacy-modal" class="modal">
+    <div class="modal-content">
+        <button class="close-modal" id="close-privacy">&times;</button>
+        <h2>Privacy Policy</h2>
+        <p>Effective Date: August 21, 2025</p>
+
+        <h3>1. Information We Collect</h3>
+        <p>Geodle does not collect personal information. The only information stored locally on your device includes:</p>
+        <ul>
+            <li>Game progress</li>
+            <li>High scores</li>
+            <li>User settings (sound, difficulty, themes)</li>
+        </ul>
+
+        <h3>2. Local Storage</h3>
+        <ul>
+            <li>All data is stored locally and is not transmitted to any server.</li>
+            <li>You can clear your local storage at any time, which will reset all progress and settings.</li>
+        </ul>
+
+        <h3>3. No Tracking or Analytics</h3>
+        <p>No cookies, tracking, analytics, or third-party scripts are used to collect data beyond local storage.</p>
+
+        <h3>4. Children's Privacy</h3>
+        <ul>
+            <li>Game is safe for children under 13.</li>
+            <li>Parents can manage local storage to remove saved data.</li>
+        </ul>
+
+        <h3>5. Data Retention</h3>
+        <p>All game progress and settings remain on your device until you clear local storage.</p>
+
+        <h3>6. Your Rights</h3>
+        <ul>
+            <li>You do not need to request access or deletion because no personal info is collected.</li>
+            <li>Clearing local storage deletes all saved data.</li>
+        </ul>
+
+        <h3>7. International Users</h3>
+        <p>The Game can be accessed worldwide. No personal info is transmitted across borders.</p>
+
+        <h3>8. Third-Party Links</h3>
+        <p>We are not responsible for the content or privacy practices of external websites.</p>
+
+        <h3>9. Changes to This Privacy Policy</h3>
+        <p>We may update this policy. Continued use constitutes acceptance of updates.</p>
+
+        <h3>10. Contact</h3>
+        <p>Email: reubenyee2012@gmail.com</p>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="data.js"></script>
+<script>
+// ==================== TRANSLATION SYSTEM ====================
+const I18n = {
+    _lang: 'en',
+    _translations: {},
+    
+    init() {
+        if (typeof Translations !== 'undefined' && Translations.getTranslations) {
+            this._translations = Translations.getTranslations();
+        } else {
+            this._translations = {
+                en: {
+                    _name: "English",
+                    title: "Geodle", gameModes: "Game Modes", clue: "Clue", of: "of",
+                    loadingClue: "Loading clue...", guessPlaceholder: "Type your guess here",
+                    guess: "Guess", totalWins: "Total Wins", resetGame: "Reset Game",
+                    resetWinCount: "Reset Win Count", pastHints: "Past Hints",
+                    guessHistory: "Guess History", shareScore: "Share My Score",
+                    newGame: "New Game", dailyLimit: "You've already played today! Come back tomorrow",
+                    dataLoadingError: "Data Loading Error", dataLoadingErrorDesc: "Could not load the geography data file.",
+                    helpImprove: "Help Us Improve", music: "Music",
+                    termsConditions: "Terms & Conditions", privacyPolicy: "Privacy Policy",
+                    showTutorial: "Show Tutorial Again",
+                    correct: "Correct! The answer is",
+                    incorrect: "{guess} is not correct. Here's the next clue...",
+                    gameOver: "Game Over! The answer was",
+                    resetGameConfirm: "Game reset! New country selected.",
+                    resetWinsConfirm: "Are you sure you want to reset your win count?",
+                    resetWinsSuccess: "Win count reset to 0!",
+                    congratulations: "Congratulations! You guessed \"{answer}\" after {clues} clue{plural}!",
+                    betterLuck: "Better luck next time! The answer was \"{answer}\"",
+                    scoreCopied: "Score copied to clipboard!",
+                    scoreWon: "Geodle - I guessed \"{answer}\" in {clues}/10 clues! Total Wins: {wins}",
+                    scoreLost: "Geodle - I couldn't guess \"{answer}\" in 10 clues. Can you?",
+                    pathModeDesc: "Get geographic clues and guess the mystery location!",
+                    countryModeDesc: "Compare countries by continent, population, GDP, and more!",
+                    flagModeDesc: "Identify countries by their flags!"
+                }
+            };
+        }
+        const saved = localStorage.getItem('geodle_language');
+        if (saved && this._translations[saved]) this._lang = saved;
+    },
+    
+    t(key, replacements = {}) {
+        const langData = this._translations[this._lang] || this._translations['en'] || {};
+        let text = langData[key] || (this._translations['en'] || {})[key] || key;
+        Object.keys(replacements).forEach(p => { text = text.replace(`{${p}}`, replacements[p]); });
+        return text;
+    },
+    
+    setLanguage(lang) {
+        if (this._translations[lang]) {
+            this._lang = lang;
+            localStorage.setItem('geodle_language', lang);
+            this.updatePage();
+        }
+    },
+    
+    getLanguage() { return this._lang; },
+    
+    getAvailableLanguages() {
+        return Object.keys(this._translations).map(code => ({
+            code, name: this._translations[code]._name || code.toUpperCase()
+        }));
+    },
+    
+    updatePage() {
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (el.tagName === 'INPUT') el.placeholder = this.t(key);
+            else el.textContent = this.t(key);
+        });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            el.placeholder = this.t(el.getAttribute('data-i18n-placeholder'));
+        });
+        const langNames = { en:'English', es:'Español', fr:'Français', de:'Deutsch', it:'Italiano', pt:'Português', ru:'Русский', zh:'中文', ja:'日本語', ko:'한국어' };
+        document.getElementById('current-language').textContent = langNames[this._lang] || this._lang.toUpperCase();
+        this.updateModeDescription();
+    },
+    
+    updateModeDescription() {
+        const desc = document.getElementById('modeDescription');
+        if (!desc) return;
+        const pathBtn = document.getElementById('pathModeBtn');
+        if (pathBtn && pathBtn.classList.contains('active')) desc.textContent = this.t('pathModeDesc');
+        else if (document.getElementById('countryModeBtn')?.classList.contains('active')) desc.textContent = this.t('countryModeDesc');
+        else if (document.getElementById('flagModeBtn')?.classList.contains('active')) desc.textContent = this.t('flagModeDesc');
+    }
+};
+
+// ==================== GAME LOGIC ====================
+let currentQuestion = null;
+let currentClueIndex = 0;
+let guessHistory = [];
+let gameEnded = false;
+let totalWins = 0;
+let worldMap = null;
+let musicEnabled = true;
+let currentSlide = 1;
+const totalSlides = 4;
+
+function loadSettings() {
+    const savedMusic = localStorage.getItem('geodle_music_enabled');
+    musicEnabled = savedMusic !== null ? savedMusic === 'true' : true;
+    document.getElementById('music-toggle').checked = musicEnabled;
+    const savedWins = localStorage.getItem('geodle_total_wins');
+    totalWins = savedWins ? parseInt(savedWins, 10) : 0;
+}
+
+function saveSettings() {
+    localStorage.setItem('geodle_music_enabled', musicEnabled.toString());
+    localStorage.setItem('geodle_total_wins', totalWins.toString());
+}
+
+function toggleMusic() {
+    musicEnabled = !musicEnabled;
+    saveSettings();
+}
+
+function showLoadingScreen() {
+    document.getElementById('loading-screen').classList.remove('hidden');
+}
+
+function hideLoadingScreen() {
+    setTimeout(() => {
+        document.getElementById('loading-screen').classList.add('hidden');
+    }, 500);
+}
+
+function initGame() {
+    showLoadingScreen();
+    setTimeout(() => {
+        if (typeof geographyData === 'undefined' || !Array.isArray(geographyData) || geographyData.length === 0) {
+            document.getElementById('loadingError').style.display = 'block';
+            document.getElementById('guessInput').disabled = true;
+            document.getElementById('guessButton').disabled = true;
+            hideLoadingScreen();
+            return;
+        }
+        
+        document.getElementById('loadingError').style.display = 'none';
+        
+        if (worldMap) {
+            worldMap.remove();
+            worldMap = null;
+        }
+        
+        worldMap = L.map('worldMap', {
+            center: [20, 0],
+            zoom: 1,
+            minZoom: 1,
+            maxZoom: 10,
+            zoomControl: true,
+            dragging: true,
+            scrollWheelZoom: true,
+            doubleClickZoom: true,
+            touchZoom: true
+        });
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 18
+        }).addTo(worldMap);
+        
+        const randomIndex = Math.floor(Math.random() * geographyData.length);
+        currentQuestion = geographyData[randomIndex];
+        currentClueIndex = 0;
+        guessHistory = [];
+        gameEnded = false;
+        
+        updateClueDisplay();
+        updateProgressBar();
+        
+        document.getElementById('guessInput').disabled = false;
+        document.getElementById('guessButton').disabled = false;
+        document.getElementById('guessInput').value = '';
+        document.getElementById('feedback').textContent = '';
+        document.getElementById('historyList').innerHTML = '';
+        document.getElementById('pastHintsList').innerHTML = '';
+        document.getElementById('endScreen').style.display = 'none';
+        
+        document.getElementById('guessInput').focus();
+        updateWinDisplay();
+        hideLoadingScreen();
+    }, Math.random() * 800 + 400);
+}
+
+function resetGame() {
+    showLoadingScreen();
+    setTimeout(() => {
+        initGame();
+        document.getElementById('feedback').textContent = I18n.t('resetGameConfirm');
+        document.getElementById('feedback').style.color = '#0078d7';
+    }, 600);
+}
+
+function updateClueDisplay() {
+    document.getElementById('currentClue').textContent = currentClueIndex + 1;
+    document.getElementById('clueBox').textContent = currentQuestion.clues[currentClueIndex];
+    updatePastHints();
+}
+
+function updatePastHints() {
+    const pastHintsList = document.getElementById('pastHintsList');
+    pastHintsList.innerHTML = '';
+    for (let i = 0; i <= currentClueIndex; i++) {
+        const li = document.createElement('li');
+        li.textContent = `${i + 1}. ${currentQuestion.clues[i]}`;
+        pastHintsList.appendChild(li);
+    }
+}
+
+function updateProgressBar() {
+    const progress = ((currentClueIndex + 1) / 10) * 100;
+    document.getElementById('progressFill').style.width = progress + '%';
+}
+
+function updateWinDisplay() {
+    document.getElementById('streak').innerHTML = `${I18n.t('totalWins')}: ${totalWins}`;
+}
+
+function handleGuess(e) {
+    e.preventDefault();
+    if (gameEnded) return;
+    
+    const guess = document.getElementById('guessInput').value.trim().toUpperCase();
+    if (!guess) return;
+    
+    const isCorrect = guess === currentQuestion.answer;
+    guessHistory.push({ text: guess, correct: isCorrect, clueNumber: currentClueIndex + 1 });
+    
+    if (isCorrect) {
+        document.getElementById('feedback').textContent = `${I18n.t('correct')} ${currentQuestion.answer}`;
+        document.getElementById('feedback').style.color = 'green';
+        totalWins++;
+        saveSettings();
+        updateWinDisplay();
+        endGame(true);
+    } else if (currentClueIndex < 9) {
+        currentClueIndex++;
+        updateClueDisplay();
+        updateProgressBar();
+        document.getElementById('feedback').textContent = I18n.t('incorrect', { guess: guess });
+        document.getElementById('feedback').style.color = 'red';
+    } else {
+        document.getElementById('feedback').textContent = `${I18n.t('gameOver')} ${currentQuestion.answer}`;
+        document.getElementById('feedback').style.color = 'orange';
+        endGame(false);
+    }
+    
+    updateHistoryDisplay();
+    document.getElementById('guessInput').value = '';
+}
+
+function updateHistoryDisplay() {
+    const historyList = document.getElementById('historyList');
+    historyList.innerHTML = '';
+    guessHistory.forEach(g => {
+        const li = document.createElement('li');
+        li.className = g.correct ? 'correct' : 'incorrect';
+        li.innerHTML = `<span>${I18n.t('clue')} ${g.clueNumber}: ${g.text}</span><span>${g.correct ? '✓' : '✗'}</span>`;
+        historyList.appendChild(li);
+    });
+}
+
+function endGame(won) {
+    gameEnded = true;
+    document.getElementById('guessInput').disabled = true;
+    document.getElementById('guessButton').disabled = true;
+    
+    const endScreen = document.getElementById('endScreen');
+    const resultMsg = document.getElementById('resultMsg');
+    
+    if (won) {
+        const plural = currentClueIndex + 1 > 1 ? 's' : '';
+        resultMsg.innerHTML = I18n.t('congratulations', { answer: currentQuestion.answer, clues: currentClueIndex + 1, plural: plural });
+    } else {
+        resultMsg.innerHTML = I18n.t('betterLuck', { answer: currentQuestion.answer });
+    }
+    
+    endScreen.style.display = 'block';
+}
+
+function shareScore() {
+    const won = guessHistory.some(g => g.correct);
+    const cluesUsed = won ? currentClueIndex + 1 : 10;
+    const scoreText = won
+        ? I18n.t('scoreWon', { answer: currentQuestion.answer, clues: cluesUsed, wins: totalWins })
+        : I18n.t('scoreLost', { answer: currentQuestion.answer });
+    
+    if (navigator.share) {
+        navigator.share({ title: 'Geodle Score', text: scoreText, url: window.location.href });
+    } else {
+        navigator.clipboard.writeText(scoreText + '\n' + window.location.href);
+        alert(I18n.t('scoreCopied'));
+    }
+}
+
+function toggleMenu() {
+    const dropdown = document.getElementById('menu-dropdown');
+    const menuButton = document.getElementById('menu-button');
+    dropdown.classList.toggle('show');
+    menuButton.classList.toggle('open');
+}
+
+function closeMenu() {
+    const dropdown = document.getElementById('menu-dropdown');
+    const menuButton = document.getElementById('menu-button');
+    dropdown.classList.remove('show');
+    menuButton.classList.remove('open');
+}
+
+function toggleLanguageDropdown() {
+    const dropdown = document.getElementById('language-dropdown');
+    const options = document.getElementById('language-options');
+    dropdown.classList.toggle('open');
+    options.classList.toggle('show');
+}
+
+function closeLanguageDropdown() {
+    const dropdown = document.getElementById('language-dropdown');
+    const options = document.getElementById('language-options');
+    dropdown.classList.remove('open');
+    options.classList.remove('show');
+}
+
+function buildLanguageOptions() {
+    const container = document.getElementById('language-options');
+    container.innerHTML = '';
+    I18n.getAvailableLanguages().forEach(lang => {
+        const div = document.createElement('div');
+        div.className = 'language-option' + (lang.code === I18n.getLanguage() ? ' selected' : '');
+        div.setAttribute('data-lang', lang.code);
+        div.textContent = lang.name;
+        div.addEventListener('click', () => {
+            I18n.setLanguage(lang.code);
+            closeLanguageDropdown();
+            buildLanguageOptions();
+        });
+        container.appendChild(div);
+    });
+}
+
+function showTutorial() {
+    document.getElementById('tutorial-overlay').style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('tutorial-overlay').classList.add('show');
+        changeSlide(1);
+    }, 50);
+}
+
+function changeSlide(slideNumber) {
+    if (slideNumber < 1 || slideNumber > totalSlides) return;
+    currentSlide = slideNumber;
+    document.querySelectorAll('.tutorial-slide').forEach(slide => slide.classList.remove('active'));
+    const currentSlideElement = document.getElementById(`slide${slideNumber}`);
+    if (currentSlideElement) currentSlideElement.classList.add('active');
+    document.querySelectorAll('.tutorial-dot').forEach(dot => {
+        dot.classList.remove('active');
+        if (parseInt(dot.getAttribute('data-slide')) === slideNumber) dot.classList.add('active');
+    });
+}
+
+function completeTutorial() {
+    localStorage.setItem('geodle_tutorial_completed', 'true');
+    document.getElementById('tutorial-overlay').classList.remove('show');
+    setTimeout(() => {
+        document.getElementById('tutorial-overlay').style.display = 'none';
+        initGame();
+    }, 500);
+}
+
+// ==================== INITIALIZATION ====================
+document.addEventListener('DOMContentLoaded', function() {
+    I18n.init();
+    I18n.updatePage();
+    buildLanguageOptions();
+    loadSettings();
+    
+    // Tutorial
+    const tutorialCompleted = localStorage.getItem('geodle_tutorial_completed');
+    if (tutorialCompleted !== 'true') {
+        setTimeout(() => showTutorial(), 800);
+    }
+    
+    // Tutorial buttons
+    document.getElementById('next-slide').addEventListener('click', () => changeSlide(2));
+    document.getElementById('next-slide-2').addEventListener('click', () => changeSlide(3));
+    document.getElementById('next-slide-3').addEventListener('click', () => changeSlide(4));
+    document.getElementById('prev-slide').addEventListener('click', () => changeSlide(1));
+    document.getElementById('prev-slide-2').addEventListener('click', () => changeSlide(2));
+    document.getElementById('prev-slide-3').addEventListener('click', () => changeSlide(3));
+    document.getElementById('skip-tutorial').addEventListener('click', completeTutorial);
+    document.getElementById('start-playing').addEventListener('click', completeTutorial);
+    document.querySelectorAll('.tutorial-dot').forEach(dot => {
+        dot.addEventListener('click', function() { changeSlide(parseInt(this.getAttribute('data-slide'))); });
+    });
+    document.getElementById('tutorial-overlay').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('show');
+            setTimeout(() => {
+                this.style.display = 'none';
+                if (localStorage.getItem('geodle_tutorial_completed') !== 'true') completeTutorial();
+            }, 500);
+        }
+    });
+    
+    // Menu
+    document.getElementById('menu-button').addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleMenu();
+    });
+    document.getElementById('menu-tutorial').addEventListener('click', function() {
+        closeMenu();
+        localStorage.removeItem('geodle_tutorial_completed');
+        showTutorial();
+    });
+    document.getElementById('menu-terms').addEventListener('click', function() {
+        closeMenu();
+        document.getElementById('terms-modal').style.display = 'block';
+    });
+    document.getElementById('menu-privacy').addEventListener('click', function() {
+        closeMenu();
+        document.getElementById('privacy-modal').style.display = 'block';
+    });
+    document.addEventListener('click', function(e) {
+        const menu = document.getElementById('menu-button');
+        const dropdown = document.getElementById('menu-dropdown');
+        const langDropdown = document.getElementById('language-dropdown');
+        if (!menu.contains(e.target) && !dropdown.contains(e.target)) closeMenu();
+        if (!langDropdown.contains(e.target)) closeLanguageDropdown();
+    });
+    
+    // Language
+    document.getElementById('language-selector').addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleLanguageDropdown();
+    });
+    
+    // Music
+    document.getElementById('music-toggle').addEventListener('change', toggleMusic);
+    
+    // Game
+    document.getElementById('guessForm').addEventListener('submit', handleGuess);
+    document.getElementById('resetBtn').addEventListener('click', resetGame);
+    document.getElementById('resetWinsBtn').addEventListener('click', function() {
+        if (confirm(I18n.t('resetWinsConfirm'))) {
+            totalWins = 0;
+            saveSettings();
+            updateWinDisplay();
+            document.getElementById('feedback').textContent = I18n.t('resetWinsSuccess');
+            document.getElementById('feedback').style.color = '#6f42c1';
+        }
+    });
+    document.getElementById('shareBtn').addEventListener('click', shareScore);
+    document.getElementById('newGameBtn').addEventListener('click', function() {
+        showLoadingScreen();
+        setTimeout(initGame, 600);
+    });
+    
+    // Mode descriptions
+    ['pathModeBtn', 'countryModeBtn', 'flagModeBtn'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.addEventListener('mouseenter', () => I18n.updateModeDescription());
+    });
+    
+    // Consent banner
+    const banner = document.getElementById('consent-banner');
+    const termsModal = document.getElementById('terms-modal');
+    const privacyModal = document.getElementById('privacy-modal');
+    
+    if (localStorage.getItem('geodleConsentAccepted') !== 'true') {
+        setTimeout(() => banner.classList.add('show'), 500);
+    } else {
+        banner.style.display = 'none';
+    }
+    
+    document.getElementById('accept-btn').addEventListener('click', () => {
+        localStorage.setItem('geodleConsentAccepted', 'true');
+        banner.classList.remove('show');
+        setTimeout(() => banner.style.display = 'none', 500);
+    });
+    
+    document.getElementById('open-terms').addEventListener('click', () => termsModal.style.display = 'block');
+    document.getElementById('open-privacy').addEventListener('click', () => privacyModal.style.display = 'block');
+    document.getElementById('close-terms').addEventListener('click', () => termsModal.style.display = 'none');
+    document.getElementById('close-privacy').addEventListener('click', () => privacyModal.style.display = 'none');
+    
+    window.addEventListener('click', (e) => {
+        if (e.target === termsModal) termsModal.style.display = 'none';
+        if (e.target === privacyModal) privacyModal.style.display = 'none';
+    });
+    
+    // Start game
+    if (localStorage.getItem('geodle_tutorial_completed') === 'true') {
+        setTimeout(initGame, 100);
+    }
+    showLoadingScreen();
+});
+</script>
+</body>
+</html>
